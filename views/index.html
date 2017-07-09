@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= title %></title>
+
+    <script src="/dist/js/pace.min.js"></script>
+    <link rel="stylesheet" href="/dist/css/pace.css"/>
     <script src="/build/index.bundle.js"></script>
   </head>
   <body>
@@ -34,5 +37,54 @@
         </div>
       </div>
     </nav>
+
+     <div class="container">
+            <div id="waveContent" class="waveform-body" data-workspaceId="<%= workspaceId %>">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="play" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-play"></span>
+                                </button>
+                                <button id="pause" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-pause"></span>
+                                </button>
+                                <button id="stop" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-stop"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="waveform-timeline">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br/>
+
+                <div id="waveList">
+               </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="addRow" style="height:100px; width:100%; font-size:20px"> Add Track</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="snackbar"></div>
+        <div id="loading"></div>
+
   </body>
 </html>
