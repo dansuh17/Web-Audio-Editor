@@ -1,5 +1,3 @@
-import AudioLibrary from '../library/audioLibrary';
-
 /* Referred http://stackoverflow.com/questions/22560413/html5-web-audio-convert-audio-buffer-into-wav-file */
 export default class FileDownloader {
     constructor() {
@@ -23,12 +21,6 @@ export default class FileDownloader {
             switch (saveMode) {
                 case 0:
                     FileDownloader.forceDownload(blob, "new_audio.wav");
-                    break;
-                case 1:
-                    AudioLibrary.requestSave(blob, "new_audio.wav", false, params);
-                    break;
-                case 2:
-                    AudioLibrary.requestSave(blob, "new_audio.wav", true, params);
                     break;
             }
         };

@@ -26,7 +26,6 @@ export default class WaveList {
     };
 
     init() {
-        // this.removeRegionOnOutsideClick(this);
         this.bindAddRowButton(this);
         return this;
     };
