@@ -22,7 +22,7 @@ module.exports = {
     historyApiFallback: true,
     contentBase: '/public',
     proxy: {
-      '*': 'http://localhost:4001',
+      '*': 'http://localhost:3000',
     },
     stats: {
       assets: false,
@@ -64,12 +64,6 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('production'),
-      },
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      compress: {
-        warnings: true,
       },
     }),
     new webpack.ProvidePlugin({
