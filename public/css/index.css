@@ -1,0 +1,153 @@
+body {
+    padding-top: 80px;
+}
+
+.row {
+	margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.track-name {
+	font-size: 16px;
+}
+
+input[type=file] {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width:100%;
+    font-size: 12px;
+    display:block;
+}
+
+.vertical-align-center {
+    display: flex;
+    align-items: center;
+}
+
+.vertical-align-bottom {
+    display: flex;
+    align-items: flex-end;
+}
+
+/* The snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+    visibility: hidden; /* Hidden by default. Visible on click */
+    min-width: 250px; /* Set a default minimum width */
+    margin-left: -125px; /* Divide value of min-width by 2 */
+    background-color: #333; /* Black background color */
+    color: #fff; /* White text color */
+    text-align: center; /* Centered text */
+    border-radius: 2px; /* Rounded borders */
+    padding: 16px; /* Padding */
+    position: fixed; /* Sit on top of the screen */
+    z-index: 1; /* Add a z-index if needed */
+    left: 50%; /* Center the snackbar */
+    bottom: 30px; /* 30px from the bottom */
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+    visibility: visible; /* Show the snackbar */
+
+    /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+    However, delay the fade out process for 2.5 seconds */
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+
+/* Styles for loading circle
+ * Referred https://gist.github.com/tjoskar/2163985
+ */
+
+@-webkit-keyframes rotate {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+}
+#loading {
+    position: fixed;
+    z-index: 3;
+    display: none;
+    top: 50%;
+    left: 50%;
+    margin-top: -37.5px;
+    margin-left: -37.5px;
+    border: 2px solid deepskyblue;
+    border-right: 0;
+    border-bottom: 0;
+    -webkit-border-radius: 100px;
+    height: 75px;
+    width: 75px;
+    /*margin: 100px; */
+    -webkit-transition: all 0.5s ease-in;
+    -webkit-animation-name:             rotate;
+    -webkit-animation-duration:         1.0s;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function: linear;
+}
+
+
+.filebox label {
+    display: inline-block;
+    padding: .5em .75em;
+    color: #999;
+    font-size: inherit;
+    line-height: normal;
+    vertical-align: middle;
+    background-color: #fdfdfd;
+    cursor: pointer;
+    border: 1px solid #ebebeb;
+    border-bottom-color:#e2e2e2;
+    border-radius: .25em;
+}
+.filebox input[type="file"] {
+    /* 파일 필드 숨기기 */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip:rect(0,0,0,0);
+    border: 0;
+}
+
+.filebox.bs3-primary label {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.padding-local-button {
+    padding: 0px 0px 0px 15px;
+}
+
+.padding-local-button.right {
+    padding-left: 5px;
+}

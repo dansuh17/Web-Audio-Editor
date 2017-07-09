@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+const app = require('../app');
+const debug = require('debug')('WebAudioEditor:server');
+const http = require('http');
+const webpack = require('webpack');
+const webpackDevServer = require('webpack-dev-server');
+
+// set ports
+const port = process.env.PORT || 3000;
+app.set('port', port);
+
+const devPort = process.env.DEVPORT || 4000;
+app.set('devport', devPort);
+
+
+/**
+ * Create HTTP Server.
+ * Listen on provided port, on all network interfaces
+ */
+const server = http.createServer(app);
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+// running on development mode
+if (process.env.NODE_ENV === 'development') {
+  console.log('Server running on development mode');
+  const config = require('../webpack.dev.config');
+  const compiler = webpack(config);
+  const devServer = new webpackDevServer(compiler, config.devServer);
+  devServer.listen(devPort, () => {
+    console.log(`webpack-dev-server is listening on port : ${devPort}`);
+  });
+}
+
+// callback function to error on server listening
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + 'is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+// message when server listening
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? 'Pipe ' + addr
+    : 'Port ' + addr.port;
+  debug('Listening on ' + bind);
+}
