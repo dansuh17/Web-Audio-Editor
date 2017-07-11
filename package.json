@@ -9,7 +9,7 @@
     "bstart": "webpack && cross-env NODE_ENV=production node ./bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "HyungSeok Kim",
+  "author": "Team 5",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.17.2",
