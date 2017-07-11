@@ -104,3 +104,4 @@ Temporary Items
 build
 .idea
 *.iml
+*bundle.js

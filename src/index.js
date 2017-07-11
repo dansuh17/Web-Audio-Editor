@@ -1,17 +1,9 @@
-import $ from 'jquery';
-import 'dist/css/bootstrap.css';
-import 'dist/css/bootstrap-toggle.css';
-import 'dist/js/bootstrap.min.js';
-import 'dist/js/bootstrap-toggle.min.js';
-import 'css/index.css';
+import '../index.html';  // required for hot-loading for changes in index.html
 
-import WaveList from 'waveList/waveList.js';
-import WaveListModifier from 'waveList/waveListModifier.js';
+function component() {
+  var element = document.createElement('div');
+  element.innerHTML = 'Shit';
+  return element;
+}
 
-
-$(document).ready(function() {
-    let waveList = WaveList.create({container: "#waveList"});
-    let audioLibrary = {};
-    let workspaceLibrary = {};
-    let waveListModifier = WaveListModifier.create(waveList, audioLibrary, workspaceLibrary);
-});
+document.body.appendChild(component());
