@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-/* GET home page */
+/* GET index page */
 router.get('/', (req, res, next) => {
   let workspaceId = req.body.workspaceId;
   if (typeof workspaceId === 'undefined') {
