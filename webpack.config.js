@@ -25,6 +25,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".js"],
+    modules: [
+      'node_modules',
+      path.resolve(__dirname, 'src'),
+    ],
   },
   module: {
     rules: [
