@@ -5,28 +5,29 @@ import wavesUI from 'waves-ui';
 const fileinput = document.getElementById('file-input');
 fileinput.addEventListener('change', readSingleFile, false);
 
+
 function readSingleFile(e) {
-  "use strict";
   const file = e.target.files[0];
   if (!file) {
     return;
   }
   const reader = new FileReader();
 
+  // create audio context - later will desireably become global singleton
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+
   reader.onload = e => {
     const contents = e.target.result;
-    drawWave(contents);
+    drawWave(contents, audioCtx);
   };
 
   reader.readAsArrayBuffer(file);
 }
 
 
-function drawWave(fileArrayBuffer) {
-  "use strict";
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
-  const audioContext = new AudioContext();
-  audioContext.decodeAudioData(fileArrayBuffer, buffer => {
+function drawWave(fileArrayBuffer, audioCtx) {
+  audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
     var $track = document.querySelector('#track-1');
     var width = $track.getBoundingClientRect().width;
     var height = 200;
