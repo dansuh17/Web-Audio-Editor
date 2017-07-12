@@ -27,9 +27,21 @@ module.exports = {
     extensions: [".js"],
   },
   module: {
-    loaders: [
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['es2015'],
+          },
+        },
+      },
       {
         test: /\.html$/,
+        // use: ['style-loader'] === use: [{loader: 'style-loader'}]
+        // === loader: 'style-loader'
         loader: 'html-loader',
       },
       {

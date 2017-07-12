@@ -9,21 +9,9 @@
     <a class="navbar-brand" href="#">Web Audio Editor</a>
   </nav>
   <h1>Web audio editor</h1>
-  <input type="file" id="file-input" />
-
   <!-- high-level container containing multiple tracks -->
-  <div class="container">
-    <!-- representing one track aligned to center vertically -->
-    <div class="row align-items-center">
-      <div class="col" id="track-1">
-        <div class="btn-group" role="group">
-          <button type="button" class="btn btn-secondary">Play</button>
-          <button type="button" class="btn btn-secondary">Pause</button>
-          <button type="button" class="btn btn-secondary">Stop</button>
-        </div>
-      </div>
-    </div>
-    <!-- track end -->
+  <div class="container" id="track-container">
+    <!-- Tracks go here. -->
   </div>
   <!-- container end -->
   <script src="dist/index.bundle.js"></script>
