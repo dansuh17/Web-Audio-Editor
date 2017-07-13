@@ -139,6 +139,11 @@ class Tracks {
 
       waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
 
+      // cursor layer
+      const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
+      cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+
+      track.add(cursorLayer);
       track.add(timeAxis);
       track.add(grid);
       track.add(waveformLayer);
