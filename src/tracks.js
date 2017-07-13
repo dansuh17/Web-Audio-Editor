@@ -2,6 +2,10 @@ import wavesUI from 'waves-ui';
 
 
 class Tracks {
+  /**
+   * Tracks constructor.
+   * @param container the container DOM object
+   */
   constructor(container) {
     // function bindings
     this.readSingleFile = this.readSingleFile.bind(this);
@@ -14,6 +18,10 @@ class Tracks {
     this.tracks = [];
   }
 
+  /**
+   * Create a new track. Append to the container.
+   * @param container container DOM obj
+   */
   createTrack(container) {
     const elemString = `
       <div class="row align-items-center" id="track${this.trackIndex}"
@@ -44,14 +52,24 @@ class Tracks {
     this.increaseTrackNum();
   }
 
+  /**
+   * Increase track number.
+   */
   increaseTrackNum() {
     this.trackIndex++;
   }
 
+  /**
+   * Increase track number.
+   */
   decreaseTrackNum() {
     this.trackIndex--;
   }
 
+  /**
+   * Reads a file when the user uploads an audio file. Then triggers to draw the viz.
+   * @param e event
+   */
   readSingleFile(e) {
     const file = e.target.files[0];
     const id = e.target.dataset.trackid;  // obtain track id
@@ -73,6 +91,12 @@ class Tracks {
     reader.readAsArrayBuffer(file);
   }
 
+  /**
+   * Draws the waveform for the uploaded audio file.
+   * @param fileArrayBuffer{ArrayBuffer} array buffer for the audio
+   * @param audioCtx{AudioContext} audio context
+   * @param trackId{int} the track id number
+   */
   drawWave(fileArrayBuffer, audioCtx, trackId) {
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
       const $track = document.querySelector(`#track${trackId}`);
