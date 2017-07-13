@@ -31,7 +31,7 @@ class Tracks {
       `;
 
     // append to the tracks container
-    this.container.insertAdjacentHTML('beforeend', elemString);
+    container.insertAdjacentHTML('beforeend', elemString);
     const createdTrack = document.getElementById(`track${this.trackIndex}`);
 
     // maintain the data as Tracks variable
@@ -39,9 +39,6 @@ class Tracks {
     const fileInput = document.getElementById(`fileinput${this.trackIndex}`);
     // add listener to the file input button
     fileInput.addEventListener('change', this.readSingleFile, false);
-
-    // this is how you access 'data-attribute'
-    console.log(createdTrack.dataset.trackid);
 
     // increase track number
     this.increaseTrackNum();
@@ -57,6 +54,7 @@ class Tracks {
 
   readSingleFile(e) {
     const file = e.target.files[0];
+    const id = e.target.dataset.trackid;  // obtain track id
     if (!file) {
       return;
     }
@@ -66,34 +64,68 @@ class Tracks {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioContext();
 
+    // when the load is complete, draw the id
     reader.onload = e => {
       const contents = e.target.result;
-      this.drawWave(contents, audioCtx);
+      this.drawWave(contents, audioCtx, id);
     };
 
     reader.readAsArrayBuffer(file);
   }
 
-  drawWave(fileArrayBuffer, audioCtx) {
+  drawWave(fileArrayBuffer, audioCtx, trackId) {
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
-      var $track = document.querySelector('#track0');
-      var width = $track.getBoundingClientRect().width;
-      var height = 200;
-      var duration = buffer.duration;
-      // define the numbr of pixels per seconds the timeline should display
-      var pixelsPerSecond = width / duration;
-      // create a timeline
-      var timeline = new wavesUI.core.Timeline(pixelsPerSecond, width);
-      // create a new track into the `track-1` element and give it a id ('main')
-      timeline.createTrack($track, height, 'main');
+      const $track = document.querySelector(`#track${trackId}`);
+      const width = $track.getBoundingClientRect().width;
+      const timeAxisHeight = 18;
+      const layerHeight = 200;
 
-      // create the layer
-      var waveformLayer = new wavesUI.helpers.WaveformLayer(buffer, {
-        height: height
+      const duration = buffer.duration;
+      const pixelsPerSecond = width / duration;
+
+      const timeline = new wavesUI.core.Timeline(pixelsPerSecond, width);
+      const track = new wavesUI.core.Track($track, layerHeight + timeAxisHeight);
+      timeline.add(track);  // adds the track to the timeline
+
+      // time axis
+      const timeAxis = new wavesUI.axis.AxisLayer(wavesUI.axis.timeAxisGenerator(), {
+        height: timeAxisHeight
       });
 
-      // insert the layer inside the 'main' track
-      timeline.addLayer(waveformLayer, 'main');
+      // Axis layers use `timeline.TimeContext` directly,
+      // they don't have their own timeContext
+      timeAxis.setTimeContext(timeline.timeContext);
+      timeAxis.configureShape(wavesUI.shapes.Ticks, {}, { color: 'steelblue' });
+
+      // bpm axis
+      const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
+        height: layerHeight,
+        top: timeAxisHeight
+      });
+
+      // create grids
+      grid.setTimeContext(timeline.timeContext);
+      grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
+
+      // waveform layer
+      const waveformLayer = new wavesUI.helpers.WaveformLayer(buffer, {
+        height: layerHeight,
+        top: timeAxisHeight
+      });
+
+      waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+
+      track.add(timeAxis);
+      track.add(grid);
+      track.add(waveformLayer);
+
+      track.render();
+      track.update();
+
+      timeline.tracks.render();
+      timeline.tracks.update();
+
+      timeline.state = new wavesUI.states.CenteredZoomState(timeline);
     });
   }
 }

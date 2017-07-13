@@ -21,6 +21,18 @@ class Toolbox {
             <button type="button" class="btn btn-secondary" id="${this.id}">
               Add Track
             </button>
+            <button type="button" class="btn btn-secondary">
+              Cut
+            </button>
+            <button type="button" class="btn btn-secondary">
+              Paste
+            </button>
+            <button type="button" class="btn btn-secondary">
+              Play All
+            </button>
+            <button type="button" class="btn btn-secondary">
+              Stop All
+            </button>
           </div>
         </div>
       </div>
@@ -38,7 +50,6 @@ class Toolbox {
 
 
 const container = document.getElementById('track-container');
-// tracks.createTrack();
 
 const tracks = new Tracks(container);
 toolbox = new Toolbox(container, tracks);
