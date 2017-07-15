@@ -52,4 +52,4 @@ class Toolbox {
 const container = document.getElementById('track-container');
 
 const tracks = new Tracks(container);
-toolbox = new Toolbox(container, tracks);
+const toolbox = new Toolbox(container, tracks);
