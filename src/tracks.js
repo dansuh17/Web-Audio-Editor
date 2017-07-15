@@ -1,4 +1,5 @@
 import wavesUI from 'waves-ui';
+import AudioSourceWrapper from 'audiosource';
 
 
 class Tracks {
@@ -20,9 +21,6 @@ class Tracks {
     this.container = container;
     this.tracks = [];
     this.audioSources = [];
-    this.buffers = [];
-    this.startedAt = [];
-    this.pausedAt = [];
 
     try {
       // create audio context - later will desireably become global singleton
@@ -128,19 +126,11 @@ class Tracks {
   stop(e) {
     const id = e.target.dataset.trackid;
     this.audioSources[id].stop();
-
-    this.pausedAt[id] = -1;
-    this.startedAt[id] = -1;
   }
 
   pause(e) {
     const id = e.target.dataset.trackid;
-    if (this.startedAt[id] === -1) {
-      return;
-    }
-
-    this.audioSources[id].stop(0);
-    // then this will fire 'ended' event on the source node
+    this.audioSources[id].pause();
   }
 
   /**
@@ -150,30 +140,7 @@ class Tracks {
    */
   play(e) {
     const id = e.target.dataset.trackid;
-    // the source node should be created again for every play
-    this.audioSources[id].disconnect();
-
-    // create a new AudioBufferSource
-    const source = this.audioCtx.createBufferSource();
-    source.buffer = this.buffers[id];
-
-    // when ended, set the timers all to default values
-    source.addEventListener('ended', (e) => {
-      // record the 'end' time - whether it is natural ending or paused ending
-      this.pausedAt[id] = Date.now() - this.startedAt[id];
-    });
-
-    this.audioSources[id] = source;
-    source.connect(this.audioCtx.destination);
-
-    // play!
-    if (this.pausedAt[id] === -1 || source.buffer.duration <= this.pausedAt[id] / 1000) {
-      this.startedAt[id] = Date.now();
-      this.audioSources[id].start(0);
-    } else {
-      this.startedAt[id] = Date.now() - this.pausedAt[id];
-      this.audioSources[id].start(0, this.pausedAt[id] / 1000);
-    }
+    this.audioSources[id].play();
   }
 
   /**
@@ -186,14 +153,6 @@ class Tracks {
   drawWave(fileArrayBuffer, audioCtx, trackId) {
     // returns AudioBuffer object as a result of decoding the audio
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
-      // create audio source
-      const audioSource = audioCtx.createBufferSource();
-      audioSource.buffer = buffer;
-      this.buffers.push(buffer);
-      this.audioSources.push(audioSource);
-      this.startedAt.push(-1);
-      this.pausedAt.push(-1);
-      this.audioSources[trackId].connect(audioCtx.destination);
 
       // define track
       const $track = document.querySelector(`#track${trackId}`);
@@ -241,9 +200,20 @@ class Tracks {
       const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
       cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
 
+      // create an audio source wrapper and collect
+      const audioSourceWrapper = new AudioSourceWrapper({
+        audioCtx,
+        trackIndex: trackId,
+        buffer,
+        source: null,
+        cursorLayer,
+      });
+      this.audioSources.push(audioSourceWrapper);
+
+      // add layers to tracks
       track.add(cursorLayer);
       track.add(timeAxis);
-      track.add(grid);
+      // track.add(grid);
       track.add(waveformLayer);
 
       track.render();
@@ -251,17 +221,7 @@ class Tracks {
 
       timeline.tracks.render();
       timeline.tracks.update();
-
       timeline.state = new wavesUI.states.CenteredZoomState(timeline);
-
-      // this is how you update the position of cursorLayer
-      (function loop() {
-        let currentTime = new Date().getTime() / 1000;
-        cursorLayer.currentPosition = currentTime % duration;
-        cursorLayer.update();
-
-        requestAnimationFrame(loop);
-      }());
     });
   }
 }
