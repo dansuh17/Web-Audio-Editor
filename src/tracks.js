@@ -115,24 +115,26 @@ class Tracks {
     // maintain the data as Tracks variable
     this.tracks.push(createdTrack);
 
-    const fileInput = document.getElementById(`fileinput${this.trackIndex}`);
+    const fileInput = document.getElementById(`fileinput${trackId}`);
     // add listener to the file input button
     fileInput.addEventListener('change', this.readSingleFile, false);
 
     // define play button
-    const playButton = document.getElementById(`play${this.trackIndex}`);
+    const playButton = document.getElementById(`play${trackId}`);
     playButton.addEventListener('click', this.play, false);
 
     // define stop button
-    const stopButton = document.getElementById(`stop${this.trackIndex}`);
+    const stopButton = document.getElementById(`stop${trackId}`);
     stopButton.addEventListener('click', this.stop, false);
 
     // define pause button
-    const pauseButton = document.getElementById(`pause${this.trackIndex}`);
+    const pauseButton = document.getElementById(`pause${trackId}`);
     pauseButton.addEventListener('click', this.pause, false);
 
     // increase track number
     this.increaseTrackNum();
+
+    return trackId;
   }
 
   /**
@@ -172,6 +174,14 @@ class Tracks {
   }
 
   /**
+   * Create a new track provided a buffer.
+   */
+  createTrackForBuffer(arrayBuffer) {
+    const trackId = this.createTrack(this.container);
+    this.drawWave(arrayBuffer, this.audioCtx, trackId);
+  }
+
+  /**
    * Wrapper method for AudioSourceWrapper's stop()
    * @param e event node
    */
@@ -208,7 +218,6 @@ class Tracks {
   drawWave(fileArrayBuffer, audioCtx, trackId) {
     // returns AudioBuffer object as a result of decoding the audio
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
-
       // define track
       const $track = document.querySelector(`#track${trackId}`);
       const width = $track.getBoundingClientRect().width;

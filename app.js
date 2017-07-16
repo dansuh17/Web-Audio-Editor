@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -26,6 +27,18 @@ app.get('/', (req, res, next) => {
   res  // test cookie
     .cookie('name', 'dansuh', { maxAge: 360000 })  // cookies expire after 360s
     .sendFile(path.resolve(__dirname, 'index.html'));
+});
+
+// request sample track
+app.get('/audio/:trackname', (req, res) => {
+  const trackName = req.params.trackname;
+  const starcraftTrack = path.resolve(__dirname, `./public/sample_tracks/${trackName}.mp3`);
+  const readStream = fs.createReadStream(starcraftTrack);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    console.log('Reading file completed : ' + starcraftTrack);
+  });
 });
 
 // not found message

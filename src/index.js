@@ -1,5 +1,11 @@
 import '../index.html';  // required for hot-loading for changes in index.html
 import Tracks from 'tracks';
+import SampleTrackLoader from 'sampletracks';
+
+// TODO: what does Symbol.iterator do???
+// setup for using for-of loop for queried dom elements
+NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+HTMLCollection.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
 
 
 class Toolbox {
@@ -19,6 +25,20 @@ class Toolbox {
       <div class="row" id="toolbox">
         <div class="row">
           <div class="col">
+            <!-- load sample track -->
+            <div class="btn-group" role="group">
+              <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Load Sample Track
+              </button>
+              <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                <a class="sampletrack-item" data-value="starcraft" href="#">Starcraft Adjutant</a>
+                <br />
+                <a class="sampletrack-item" data-value="itsgonnarain" href="#">It's Gonna Rain</a>
+                <br />
+                <a class="sampletrack-item" data-value="exhale" href="#">Exhale</a>
+              </div>
+            </div>
+            
             <!-- Effects & editing functionalities. -->
             <div class="btn-group" role="group">
               <button type="button" class="btn btn-secondary" id="${this.id}">
@@ -95,3 +115,4 @@ const container = document.getElementById('track-container');
 
 const tracks = new Tracks(container);
 const toolbox = new Toolbox(container, tracks);
+const sampleTrackLoader = new SampleTrackLoader(tracks);
