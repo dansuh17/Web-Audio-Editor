@@ -16,25 +16,38 @@ class Toolbox {
   createToolbox() {
     const elemString = `
       <div class="row" id="toolbox">
-        <div class="col">
-          <div class="btn-group" role="group">
-            <button type="button" class="btn btn-secondary" id="${this.id}">
-              Add Track
-            </button>
-            <button type="button" class="btn btn-secondary">
-              Cut
-            </button>
-            <button type="button" class="btn btn-secondary">
-              Paste
-            </button>
-            <button type="button" class="btn btn-secondary">
-              Play All
-            </button>
-            <button type="button" class="btn btn-secondary">
-              Stop All
-            </button>
+        <div class="row">
+          <div class="col">
+            <!-- Effects & editing functionalities. -->
+            <div class="btn-group" role="group">
+              <button type="button" class="btn btn-secondary" id="${this.id}">
+                Add Track
+              </button>
+              <button type="button" class="btn btn-secondary">
+                Cut
+              </button>
+              <button type="button" class="btn btn-secondary">
+                Paste
+              </button>
+              <button type="button" class="btn btn-secondary">
+                Play All
+              </button>
+              <button type="button" class="btn btn-secondary">
+                Stop All
+              </button>
+            </div>
+            <!-- mode selection -->
+            <div class="btn-group" role="group">
+              <button type="button" name="mode" value="zoom" class="btn btn-primary">
+                Zoom Mode
+              </button>
+              <button type="button" name="mode" value="selection" class="btn btn-secondary">
+                Selection Mode
+              </button>
+            </div>
           </div>
         </div>
+        <!-- Toggle buttons -->
       </div>
       `;
 
@@ -45,6 +58,24 @@ class Toolbox {
     addTrackBtn.addEventListener('click', () => {
       this.tracks.createTrack(this.container);
     }, false);
+
+    // enable mode toggling
+    const modeSelectionRadio = document.getElementsByName('mode');
+    for (let elem of modeSelectionRadio) {
+      elem.addEventListener('click', () => {
+        for (let childElem of modeSelectionRadio) {
+          if (childElem !== elem) {
+            childElem.className = 'btn btn-secondary';
+          } else {
+            // activate this button
+            childElem.className = 'btn btn-primary';
+          }
+        }
+
+        // send the Tracks instance the toggle signal
+        this.tracks.toggleMode();
+      }, false);
+    }
   }
 }
 

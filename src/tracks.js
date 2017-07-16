@@ -5,7 +5,6 @@ import AudioSourceWrapper from 'audiosource';
 class Tracks {
   /**
    * Tracks constructor.
-   *
    * @param container the container DOM object
    */
   constructor(container) {
@@ -21,6 +20,8 @@ class Tracks {
     this.container = container;
     this.tracks = [];
     this.audioSources = [];
+    this.timelines = [];
+    this.mode = 'zoom';
 
     try {
       // create audio context - later will desireably become global singleton
@@ -28,6 +29,20 @@ class Tracks {
       this.audioCtx = new AudioContext();
     } catch(e) {
       alert('This browser does not support Web Audio API!');
+    }
+  }
+
+  toggleMode() {
+    this.mode = this.mode === 'zoom' ? 'selection' : 'zoom';
+
+    for (let timeline of this.timelines) {
+      if (this.mode === 'zoom') {
+        timeline.state = new wavesUI.states.CenteredZoomState(timeline);
+      } else if (this.mode === 'selection') {
+        timeline.state = new wavesUI.states.SimpleEditionState(timeline);
+      } else {
+        throw 'Invalid Mode for Tracks';
+      }
     }
   }
 
@@ -53,6 +68,9 @@ class Tracks {
             <button type="button" class="btn btn-secondary"
             data-trackid="${this.trackIndex}" id="stop${this.trackIndex}">
               Stop
+            </button>
+            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
+              On
             </button>
           </div>
           <input type="file" id="fileinput${this.trackIndex}"
@@ -123,19 +141,26 @@ class Tracks {
     reader.readAsArrayBuffer(file);
   }
 
+  /**
+   * Wrapper method for AudioSourceWrapper's stop()
+   * @param e event node
+   */
   stop(e) {
     const id = e.target.dataset.trackid;
     this.audioSources[id].stop();
   }
 
+  /**
+   * Wrapper method for AudioSourceWrapper's pause()
+   * @param e event node
+   */
   pause(e) {
     const id = e.target.dataset.trackid;
     this.audioSources[id].pause();
   }
 
   /**
-   * Plays the track.
-   *
+   * Plays the track. Wrapper method for AudioSourceWrapper's play()
    * @param e event node
    */
   play(e) {
@@ -196,6 +221,29 @@ class Tracks {
 
       waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
 
+      // segment layer
+      const segmentData = [{
+        start: 0,
+        duration: 1,
+        color: 'orange',
+        text: 'selection',
+      }];
+      const segmentLayer = new wavesUI.core.Layer('collection', segmentData, {
+        height: layerHeight,
+      });
+      segmentLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+      segmentLayer.configureShape(wavesUI.shapes.AnnotatedSegment, {
+        x: function(d, v) {
+          if (v !== undefined) { d.start = v; }
+          return d.start;
+        },
+        width: function(d, v) {
+          if (v !== undefined) { d.duration = v; }
+          return d.duration;
+        }
+      });
+      segmentLayer.setBehavior(new wavesUI.behaviors.SegmentBehavior());
+
       // cursor layer
       const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
       cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
@@ -215,13 +263,17 @@ class Tracks {
       track.add(timeAxis);
       // track.add(grid);
       track.add(waveformLayer);
+      track.add(segmentLayer);
 
       track.render();
       track.update();
 
       timeline.tracks.render();
       timeline.tracks.update();
+
+      this.timelines.push(timeline);
       timeline.state = new wavesUI.states.CenteredZoomState(timeline);
+      // timeline.state = new wavesUI.states.SimpleEditionState(timeline);
     });
   }
 }

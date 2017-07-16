@@ -1,3 +1,7 @@
+/**
+ * Wrapper class for Web Audio API's AudioSourceNode.
+ * Additional functionalities such as play, stop, pause are implemented.
+ */
 class AudioSourceWrapper {
   constructor(params) {
     this.id = params.trackIndex;
