@@ -34,10 +34,10 @@ class Toolbox {
               <button type="button" class="btn btn-secondary" id="${this.id}">
                 Add Track
               </button>
-              <button type="button" class="btn btn-secondary">
+              <button type="button" class="btn btn-secondary" id="cutBtn">
                 Cut
               </button>
-              <button type="button" class="btn btn-secondary">
+              <button type="button" class="btn btn-secondary" id="pasteBtn">
                 Paste
               </button>
               <button type="button" class="btn btn-secondary" id="playAllBtn">
@@ -115,6 +115,12 @@ class Toolbox {
     const pauseAllBtn = document.getElementById('pauseAllBtn');
     pauseAllBtn.addEventListener('click', () => {
       this.tracks.pauseAll();
+    });
+
+    // cut selection
+    const cutBtn = document.getElementById('cutBtn');
+    cutBtn.addEventListener('click', () => {
+      this.tracks.cutSelection();
     });
   }
 }

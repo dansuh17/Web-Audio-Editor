@@ -138,6 +138,15 @@ class Tracks {
   }
 
   /**
+   * Cuts the selected region.
+   */
+  cutSelection() {
+    const id = this.currentTrackId;
+    const segmentData = this.getSegmentData(id);
+    this.audioSources[id].cut(segmentData);
+  }
+
+  /**
    * Increase track number.
    */
   increaseTrackNum() {
@@ -237,6 +246,7 @@ class Tracks {
     // returns AudioBuffer object as a result of decoding the audio
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
       // define track
+      console.log(buffer);
       const $track = document.querySelector(`#track${trackId}`);
       const width = $track.getBoundingClientRect().width;
       const timeAxisHeight = 18;

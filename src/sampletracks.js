@@ -6,6 +6,9 @@ class SampleTrackLoader {
     this.tracksInstance = tracks;
   }
 
+  /**
+   * Attach listener to 'Sample Track Loader' button to create new track on click.
+   */
   attachListener() {
     const sampleTrackItems = document.getElementsByClassName('sampletrack-item');
 

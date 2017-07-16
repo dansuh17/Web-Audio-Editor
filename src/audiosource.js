@@ -71,6 +71,22 @@ class AudioSourceWrapper {
     }
   }
 
+  cut(data) {
+    // TODO: 아래 코드 참고!
+    // button.onclick = function() {
+    //   // Fill the buffer with white noise;
+    //   // just random values between -1.0 and 1.0
+    //   for (var channel = 0; channel < channels; channel++) {
+    //     // This gives us the actual array that contains the data
+    //     var nowBuffering = myArrayBuffer.getChannelData(channel);
+    //     for (var i = 0; i < frameCount; i++) {
+    //       // Math.random() is in [0; 1.0]
+    //       // audio needs to be in [-1.0; 1.0]
+    //       nowBuffering[i] = Math.random() * 2 - 1;
+    //     }
+    //   }
+  }
+
   stop() {
     if (this.source) {
       this.source.disconnect();
