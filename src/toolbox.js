@@ -40,10 +40,13 @@ class Toolbox {
               <button type="button" class="btn btn-secondary">
                 Paste
               </button>
-              <button type="button" class="btn btn-secondary">
+              <button type="button" class="btn btn-secondary" id="playAllBtn">
                 Play All
               </button>
-              <button type="button" class="btn btn-secondary">
+              <button type="button" class="btn btn-secondary" id="pauseAllBtn">
+                Pause All
+              </button>
+              <button type="button" class="btn btn-secondary" id="stopAllBtn">
                 Stop All
               </button>
               <button type="button" class="btn btn-secondary" id="lpf">
@@ -97,6 +100,22 @@ class Toolbox {
     lpFilter.addEventListener('click', () =>{
       this.tracks.applyLpFilter();
     }, false);
+
+    // play / stop / pause all buttons
+    const playAllBtn = document.getElementById('playAllBtn');
+    playAllBtn.addEventListener('click', () => {
+      this.tracks.playAll();
+    });
+
+    const stopAllBtn = document.getElementById('stopAllBtn');
+    stopAllBtn.addEventListener('click', () => {
+      this.tracks.stopAll();
+    });
+
+    const pauseAllBtn = document.getElementById('pauseAllBtn');
+    pauseAllBtn.addEventListener('click', () => {
+      this.tracks.pauseAll();
+    });
   }
 }
 

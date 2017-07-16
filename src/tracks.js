@@ -190,6 +190,24 @@ class Tracks {
     this.audioSources[id].stop();
   }
 
+  stopAll() {
+    for (let source of this.audioSources) {
+      source.stop();
+    }
+  }
+
+  pauseAll() {
+    for (let source of this.audioSources) {
+      source.pause();
+    }
+  }
+
+  playAll() {
+    for (let source of this.audioSources) {
+      source.play();
+    }
+  }
+
   /**
    * Wrapper method for AudioSourceWrapper's pause()
    * @param e event node
