@@ -233,15 +233,15 @@ class Tracks {
       timeAxis.setTimeContext(timeline.timeContext);
       timeAxis.configureShape(wavesUI.shapes.Ticks, {}, { color: 'steelblue' });
 
-      // bpm axis
-      const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
-        height: layerHeight,
-        top: timeAxisHeight
-      });
-
-      // create grids
-      grid.setTimeContext(timeline.timeContext);
-      grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
+      // // bpm grid axis
+      // const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
+      //   height: layerHeight,
+      //   top: timeAxisHeight
+      // });
+      //
+      // // create grids
+      // grid.setTimeContext(timeline.timeContext);
+      // grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
 
       // waveform layer
       const waveformLayer = new wavesUI.helpers.WaveformLayer(buffer, {
@@ -253,8 +253,8 @@ class Tracks {
 
       // segment layer
       const segmentData = [{
-        start: 0,
-        duration: 4.44,
+        start: 1,
+        duration: 2,
         color: 'orange',
         text: 'selection',
       }];
