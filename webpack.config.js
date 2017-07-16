@@ -21,7 +21,11 @@ module.exports = {
       warnings: true,
       errors: true,
     },
-    publicPath: '/dist',  // contents from webpack served from HERE
+    publicPath: '/public/',  // contents from webpack served from HERE
+    index: 'index.html',
+    stats: {
+      colors: true,  // good to have pretty outputs
+    },
   },
   resolve: {
     extensions: [".js"],
