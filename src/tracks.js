@@ -21,6 +21,7 @@ class Tracks {
     this.tracks = [];
     this.audioSources = [];
     this.timelines = [];
+    this.segmentLayers = [];
     this.mode = 'zoom';
 
     try {
@@ -32,6 +33,9 @@ class Tracks {
     }
   }
 
+  /**
+   * Toggle between zoom and selection modes.
+   */
   toggleMode() {
     this.mode = this.mode === 'zoom' ? 'selection' : 'zoom';
 
@@ -47,44 +51,70 @@ class Tracks {
   }
 
   /**
+   * Retrieves the data of selected segment of the track.
+   * Contains duration and start time.
+   *
+   * @param trackid track ID
+   * @returns {Object} data for the segment
+   */
+  getSegmentData(trackid) {
+    const segmentLayer = this.segmentLayers[trackid];
+    const segment = segmentLayer.items[0];
+
+    return segmentLayer.getDatumFromItem(segment);
+  }
+
+  applyLpFilter() {
+    const id = this.currentTrackId;
+    this.audioSources[id].applyLpFilter();
+  }
+
+  /**
    * Create a new track. Append to the container.
    *
    * @param container container DOM obj
    */
   createTrack(container) {
+    const trackId = this.trackIndex;
     const elemString = `
-      <div class="row align-items-center" id="track${this.trackIndex}"
-      data-trackid="${this.trackIndex}">
+      <div class="row align-items-center" id="track${trackId}"
+      data-trackid="${trackId}">
         <div class="col">
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-secondary"
-            data-trackid="${this.trackIndex}" id="play${this.trackIndex}">
+            data-trackid="${trackId}" id="play${trackId}">
               Play
             </button>
             <button type="button" class="btn btn-secondary"
-            data-trackid="${this.trackIndex}" id="pause${this.trackIndex}">
+            data-trackid="${trackId}" id="pause${trackId}">
               Pause
             </button>
             <button type="button" class="btn btn-secondary"
-            data-trackid="${this.trackIndex}" id="stop${this.trackIndex}">
+            data-trackid="${trackId}" id="stop${trackId}">
               Stop
             </button>
-            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" autocomplete="off">
-              On
-            </button>
           </div>
-          <input type="file" id="fileinput${this.trackIndex}"
-          data-trackid="${this.trackIndex}"/>
+          <br />
+          <label class="btn btn-info">
+            <input type="file" id="fileinput${trackId}"
+            data-trackid="${trackId}"/>
+          </label>
         </div>
       </div>
       `;
 
-    // append to the tracks container
+    // indicate which track the user is now selecting
+
     container.insertAdjacentHTML('beforeend', elemString);
-    const createdTrack = document.getElementById(`track${this.trackIndex}`);
+    const createdTrack = document.getElementById(`track${trackId}`);
+    // indicate which track the user is now selecting
+    createdTrack.addEventListener('click', () => {
+      this.currentTrackId = trackId;
+    });
 
     // maintain the data as Tracks variable
     this.tracks.push(createdTrack);
+
     const fileInput = document.getElementById(`fileinput${this.trackIndex}`);
     // add listener to the file input button
     fileInput.addEventListener('change', this.readSingleFile, false);
@@ -224,7 +254,7 @@ class Tracks {
       // segment layer
       const segmentData = [{
         start: 0,
-        duration: 1,
+        duration: 4.44,
         color: 'orange',
         text: 'selection',
       }];
@@ -243,6 +273,7 @@ class Tracks {
         }
       });
       segmentLayer.setBehavior(new wavesUI.behaviors.SegmentBehavior());
+      this.segmentLayers.push(segmentLayer);
 
       // cursor layer
       const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
@@ -272,8 +303,7 @@ class Tracks {
       timeline.tracks.update();
 
       this.timelines.push(timeline);
-      timeline.state = new wavesUI.states.CenteredZoomState(timeline);
-      // timeline.state = new wavesUI.states.SimpleEditionState(timeline);
+      timeline.state = new wavesUI.states.CenteredZoomState(timeline);  // initial state set to zoom
     });
   }
 }

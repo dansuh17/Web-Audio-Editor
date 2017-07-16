@@ -1,6 +1,7 @@
 import '../index.html';  // required for hot-loading for changes in index.html
 import Tracks from 'tracks';
 
+
 class Toolbox {
   constructor(container, tracks) {
     this.container = container;
@@ -35,6 +36,9 @@ class Toolbox {
               <button type="button" class="btn btn-secondary">
                 Stop All
               </button>
+              <button type="button" class="btn btn-secondary" id="lpf">
+                Low Pass Filter
+              </button>
             </div>
             <!-- mode selection -->
             <div class="btn-group" role="group">
@@ -51,6 +55,7 @@ class Toolbox {
       </div>
       `;
 
+    // add the toolbox of the web audio editor
     this.container.insertAdjacentHTML('beforeend', elemString);
 
     // if 'Add Track' button is pressed, create a new track.
@@ -76,6 +81,12 @@ class Toolbox {
         this.tracks.toggleMode();
       }, false);
     }
+
+    // add low pass filter listener
+    const lpFilter = document.getElementById('lpf');
+    lpFilter.addEventListener('click', () =>{
+      this.tracks.applyLpFilter();
+    }, false);
   }
 }
 

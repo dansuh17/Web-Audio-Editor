@@ -13,10 +13,30 @@ class AudioSourceWrapper {
     this.pausedAt = 0;
     this.updatingCursor = false;
     this.isPlaying = false;
+    this.destination = this.audioCtx.destination;
+    this.filter = null;
 
     // methods binding to this
     this.pause = this.pause.bind(this);
     this.updateCursor = this.updateCursor.bind(this);
+  }
+
+  applyLpFilter() {
+    // define the filter
+    const biquadFilter = this.audioCtx.createBiquadFilter();
+    biquadFilter.type = 'lowshelf';
+    biquadFilter.frequency.value = 1000;
+    biquadFilter.gain.value = 25;
+
+    // connect the filter into the pipeline
+    this.filter = biquadFilter;
+    biquadFilter.connect(this.audioCtx.destination);
+  }
+
+  disconnectFilter() {
+    this.filter.disconnect();
+    this.source.connect(this.audioCtx.destination);
+    this.filter = null;
   }
 
   updateCursor() {
@@ -29,15 +49,22 @@ class AudioSourceWrapper {
   play() {
     const newSource = this.audioCtx.createBufferSource();
     newSource.buffer = this.buffer;
-    newSource.connect(this.audioCtx.destination);
-    this.source = newSource;
 
+    // connect the source either directly to speaker or the filter
+    if (this.filter !== null) {
+      newSource.connect(this.filter);
+    } else {
+      newSource.connect(this.audioCtx.destination);
+    }
+
+    // start from paused position (which will be 0 if newly created)
+    this.source = newSource;
     this.source.start(0, this.pausedAt);
     this.startedAt = this.audioCtx.currentTime - this.pausedAt;
     this.pausedAt = 0;
     this.isPlaying = true;
 
-    // start updating cursor if it has not started yet
+    // start updating playback cursor if it has not started yet
     if (!this.updatingCursor) {
       this.updateCursor();
       this.updatingCursor = true;
