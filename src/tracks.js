@@ -12,17 +12,16 @@ class Tracks {
     this.readSingleFile = this.readSingleFile.bind(this);
     this.increaseTrackNum = this.increaseTrackNum.bind(this);
     this.decreaseTrackNum = this.decreaseTrackNum.bind(this);
+    this.renderWave = this.renderWave.bind(this);
     this.play = this.play.bind(this);
     this.stop = this.stop.bind(this);
     this.pause = this.pause.bind(this);
 
     this.trackIndex = 0;
     this.container = container;
-    this.tracks = [];
-    this.audioSources = [];
-    this.timelines = [];
-    this.segmentLayers = [];
+    this.tracks = {};
     this.mode = 'zoom';
+    this.currentTrackId = 0;
 
     try {
       // create audio context - later will desireably become global singleton
@@ -39,7 +38,8 @@ class Tracks {
   toggleMode() {
     this.mode = this.mode === 'zoom' ? 'selection' : 'zoom';
 
-    for (let timeline of this.timelines) {
+    for (let trackId of Object.keys(this.tracks)) {
+      const timeline = this.tracks[trackId].timeline;
       if (this.mode === 'zoom') {
         timeline.state = new wavesUI.states.CenteredZoomState(timeline);
       } else if (this.mode === 'selection') {
@@ -58,7 +58,7 @@ class Tracks {
    * @returns {Object} data for the segment
    */
   getSegmentData(trackid) {
-    const segmentLayer = this.segmentLayers[trackid];
+    const segmentLayer = this.tracks[trackid].segmentLayer;
     const segment = segmentLayer.items[0];
 
     return segmentLayer.getDatumFromItem(segment);
@@ -66,7 +66,7 @@ class Tracks {
 
   applyLpFilter() {
     const id = this.currentTrackId;
-    this.audioSources[id].applyLpFilter();
+    this.tracks[id].audioSource.applyLpFilter();
   }
 
   /**
@@ -113,7 +113,7 @@ class Tracks {
     });
 
     // maintain the data as Tracks variable
-    this.tracks.push(createdTrack);
+    this.tracks[trackId] = { trackelem: createdTrack };
 
     const fileInput = document.getElementById(`fileinput${trackId}`);
     // add listener to the file input button
@@ -138,12 +138,13 @@ class Tracks {
   }
 
   /**
-   * Cuts the selected region.
+   * Cuts out the selected region.
    */
   cutSelection() {
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
-    this.audioSources[id].cut(segmentData);
+    const newAudioBuffer = this.tracks[id].audioSource.cut(segmentData);
+    this.renderWave(newAudioBuffer, this.audioCtx, id);  // draw the track waveform again
   }
 
   /**
@@ -196,24 +197,24 @@ class Tracks {
    */
   stop(e) {
     const id = e.target.dataset.trackid;
-    this.audioSources[id].stop();
+    this.tracks[id].audioSource.stop();
   }
 
   stopAll() {
-    for (let source of this.audioSources) {
-      source.stop();
+    for (let trackId of Obj.keys(this.tracks)) {
+      this.tracks[trackId].audioSource.stop();
     }
   }
 
   pauseAll() {
-    for (let source of this.audioSources) {
-      source.pause();
+    for (let trackId of Obj.keys(this.tracks)) {
+      this.tracks[trackId].audioSource.play();
     }
   }
 
   playAll() {
     for (let source of this.audioSources) {
-      source.play();
+      source.pause();
     }
   }
 
@@ -223,7 +224,7 @@ class Tracks {
    */
   pause(e) {
     const id = e.target.dataset.trackid;
-    this.audioSources[id].pause();
+    this.tracks[id].audioSource.pause();
   }
 
   /**
@@ -232,7 +233,119 @@ class Tracks {
    */
   play(e) {
     const id = e.target.dataset.trackid;
-    this.audioSources[id].play();
+    this.tracks[id].audioSource.play();
+  }
+
+  /**
+   * Drawing part of creating a new wave.
+   * @param audioBuffer audioBuffer to draw
+   * @param audioCtx {AudioContext} audio context
+   * @param trackId {number} the track id
+   */
+  renderWave(audioBuffer, audioCtx, trackId) {
+    console.log(audioBuffer);
+    const $track = document.querySelector(`#track${trackId}`);
+    const width = $track.getBoundingClientRect().width;
+    const timeAxisHeight = 18;
+    const layerHeight = 200;
+
+    const duration = audioBuffer.duration;
+    const pixelsPerSecond = width / duration;
+
+    // create timeline and track
+    const timeline = new wavesUI.core.Timeline(pixelsPerSecond, width);
+    const track = new wavesUI.core.Track($track, layerHeight + timeAxisHeight);
+    timeline.add(track);  // adds the track to the timeline
+
+    // time axis
+    const timeAxis = new wavesUI.axis.AxisLayer(wavesUI.axis.timeAxisGenerator(), {
+      height: timeAxisHeight
+    });
+
+    // Axis layers use `timeline.TimeContext` directly,
+    // they don't have their own timeContext
+    timeAxis.setTimeContext(timeline.timeContext);
+    timeAxis.configureShape(wavesUI.shapes.Ticks, {}, { color: 'steelblue' });
+
+    // // bpm grid axis
+    // const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
+    //   height: layerHeight,
+    //   top: timeAxisHeight
+    // });
+    //
+    // // create grids
+    // grid.setTimeContext(timeline.timeContext);
+    // grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
+
+    // waveform layer
+    const waveformLayer = new wavesUI.helpers.WaveformLayer(audioBuffer, {
+      height: layerHeight,
+      top: timeAxisHeight
+    });
+
+    waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+
+    // segment layer
+    const segmentData = [{
+      start: 1,
+      duration: 2,
+      color: 'orange',
+      text: 'selection',
+    }];
+    const segmentLayer = new wavesUI.core.Layer('collection', segmentData, {
+      height: layerHeight,
+    });
+    segmentLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+    segmentLayer.configureShape(wavesUI.shapes.AnnotatedSegment, {
+      x: function(d, v) {
+        if (v !== undefined) { d.start = v; }
+        return d.start;
+      },
+      width: function(d, v) {
+        if (v !== undefined) { d.duration = v; }
+        return d.duration;
+      }
+    });
+    segmentLayer.setBehavior(new wavesUI.behaviors.SegmentBehavior());
+    this.tracks[trackId]['segmentLayer'] = segmentLayer;
+
+    // cursor layer
+    const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
+    cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
+
+    // create an audio source wrapper and collect
+    const audioSourceWrapper = new AudioSourceWrapper({
+      audioCtx,
+      trackIndex: trackId,
+      buffer: audioBuffer,
+      source: null,
+      cursorLayer,
+    });
+    this.tracks[trackId]['audioSource'] = audioSourceWrapper;
+
+    // add layers to tracks
+    track.add(cursorLayer);
+    track.add(timeAxis);
+    // track.add(grid);
+    track.add(waveformLayer);
+    track.add(segmentLayer);
+
+    track.render();
+    track.update();
+
+    timeline.tracks.render();
+    timeline.tracks.update();
+
+    this.tracks[trackId]['timeline'] = timeline;
+    timeline.state = new wavesUI.states.CenteredZoomState(timeline);  // initial state set to zoom
+  }
+
+  /**
+   * Erases the wave given the id.
+   * @param trackId {number} track identification
+   */
+  eraseWave(trackId) {
+    // TODO:
   }
 
   /**
@@ -245,102 +358,7 @@ class Tracks {
   drawWave(fileArrayBuffer, audioCtx, trackId) {
     // returns AudioBuffer object as a result of decoding the audio
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
-      // define track
-      console.log(buffer);
-      const $track = document.querySelector(`#track${trackId}`);
-      const width = $track.getBoundingClientRect().width;
-      const timeAxisHeight = 18;
-      const layerHeight = 200;
-
-      const duration = buffer.duration;
-      const pixelsPerSecond = width / duration;
-
-      // create timeline and track
-      const timeline = new wavesUI.core.Timeline(pixelsPerSecond, width);
-      const track = new wavesUI.core.Track($track, layerHeight + timeAxisHeight);
-      timeline.add(track);  // adds the track to the timeline
-
-      // time axis
-      const timeAxis = new wavesUI.axis.AxisLayer(wavesUI.axis.timeAxisGenerator(), {
-        height: timeAxisHeight
-      });
-
-      // Axis layers use `timeline.TimeContext` directly,
-      // they don't have their own timeContext
-      timeAxis.setTimeContext(timeline.timeContext);
-      timeAxis.configureShape(wavesUI.shapes.Ticks, {}, { color: 'steelblue' });
-
-      // // bpm grid axis
-      // const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
-      //   height: layerHeight,
-      //   top: timeAxisHeight
-      // });
-      //
-      // // create grids
-      // grid.setTimeContext(timeline.timeContext);
-      // grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
-
-      // waveform layer
-      const waveformLayer = new wavesUI.helpers.WaveformLayer(buffer, {
-        height: layerHeight,
-        top: timeAxisHeight
-      });
-
-      waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
-
-      // segment layer
-      const segmentData = [{
-        start: 1,
-        duration: 2,
-        color: 'orange',
-        text: 'selection',
-      }];
-      const segmentLayer = new wavesUI.core.Layer('collection', segmentData, {
-        height: layerHeight,
-      });
-      segmentLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
-      segmentLayer.configureShape(wavesUI.shapes.AnnotatedSegment, {
-        x: function(d, v) {
-          if (v !== undefined) { d.start = v; }
-          return d.start;
-        },
-        width: function(d, v) {
-          if (v !== undefined) { d.duration = v; }
-          return d.duration;
-        }
-      });
-      segmentLayer.setBehavior(new wavesUI.behaviors.SegmentBehavior());
-      this.segmentLayers.push(segmentLayer);
-
-      // cursor layer
-      const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
-      cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
-
-      // create an audio source wrapper and collect
-      const audioSourceWrapper = new AudioSourceWrapper({
-        audioCtx,
-        trackIndex: trackId,
-        buffer,
-        source: null,
-        cursorLayer,
-      });
-      this.audioSources.push(audioSourceWrapper);
-
-      // add layers to tracks
-      track.add(cursorLayer);
-      track.add(timeAxis);
-      // track.add(grid);
-      track.add(waveformLayer);
-      track.add(segmentLayer);
-
-      track.render();
-      track.update();
-
-      timeline.tracks.render();
-      timeline.tracks.update();
-
-      this.timelines.push(timeline);
-      timeline.state = new wavesUI.states.CenteredZoomState(timeline);  // initial state set to zoom
+      this.renderWave(buffer, audioCtx, trackId);
     });
   }
 }

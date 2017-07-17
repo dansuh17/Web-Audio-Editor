@@ -71,20 +71,45 @@ class AudioSourceWrapper {
     }
   }
 
+  /**
+   * Cut out portion of the buffer specified by 'data.'
+   * @param data contains information about the segment
+   * @returns {AudioBuffer} the new audio buffer
+   */
   cut(data) {
-    // TODO: 아래 코드 참고!
-    // button.onclick = function() {
-    //   // Fill the buffer with white noise;
-    //   // just random values between -1.0 and 1.0
-    //   for (var channel = 0; channel < channels; channel++) {
-    //     // This gives us the actual array that contains the data
-    //     var nowBuffering = myArrayBuffer.getChannelData(channel);
-    //     for (var i = 0; i < frameCount; i++) {
-    //       // Math.random() is in [0; 1.0]
-    //       // audio needs to be in [-1.0; 1.0]
-    //       nowBuffering[i] = Math.random() * 2 - 1;
-    //     }
-    //   }
+    // cut out the selected data!
+    const start = data.start;  // in seconds!
+    const duration = data.duration;
+
+    const buffer = this.buffer;
+    const originalFrames = buffer.length;
+    const numChannels = this.buffer.numberOfChannels;
+
+    // calculate buffer info
+    const sampleRate = this.audioCtx.sampleRate;
+    const startFrame = Math.floor(start * sampleRate);
+    const durationInFrames = Math.floor(duration * sampleRate);
+    const afterFrameCount = Math.floor(originalFrames - durationInFrames);
+
+    const newBuffer = this.audioCtx.createBuffer(numChannels, afterFrameCount, sampleRate);
+
+    // copy contents into the new buffer
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const nowBuffer = newBuffer.getChannelData(channel);
+
+      for (let i = 0; i < afterFrameCount; i++) {
+        if (i < startFrame) {
+          nowBuffer[i] = oldBufferChannelData[i];
+        } else {
+          nowBuffer[i] = oldBufferChannelData[i + durationInFrames];
+        }
+      }
+    }
+
+    // allocate new buffer
+    this.buffer = newBuffer;
+    return newBuffer;
   }
 
   stop() {
