@@ -233,13 +233,13 @@ class Tracks {
 
   pauseAll() {
     for (let trackId of Obj.keys(this.tracks)) {
-      this.tracks[trackId].audioSource.play();
+      this.tracks[trackId].audioSource.pause();
     }
   }
 
   playAll() {
-    for (let source of this.audioSources) {
-      source.pause();
+    for (let trackId of Obj.keys(this.tracks)) {
+      this.tracks[trackId].audioSource.play();
     }
   }
 
