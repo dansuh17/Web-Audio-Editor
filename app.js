@@ -7,6 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const webpack = require('webpack');
+const session = require('express-session');
 
 const app = express();
 
@@ -17,6 +18,12 @@ const VIEWPATH = path.resolve(__dirname, './views/');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+// TODO: on session tutorial https://velopert.com/406
+app.use(session({
+  secret: 'webaudio-secret$$',
+  resave: false,  // TODO: ??
+}));
 
 // indicate static file serve directories
 app.use(express.static(path.join(__dirname, 'public')));
