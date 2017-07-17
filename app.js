@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const webpack = require('webpack');
 const session = require('express-session');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use(session({
   secret: 'webaudio-secret$$',
   resave: false,  // TODO: ??
+  saveUninitialized: true,
 }));
 
 // indicate static file serve directories

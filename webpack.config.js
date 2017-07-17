@@ -22,7 +22,7 @@ module.exports = {
       errors: true,
     },
     publicPath: '/dist',  // contents from webpack served from HERE
-    constentBase: '/public',  // contents from non-webpack
+    contentBase: '/public',  // contents from non-webpack
     index: 'index.html',
     stats: {
       colors: true,  // good to have pretty outputs
