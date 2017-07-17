@@ -1,53 +1,88 @@
 'use strict';
 
-const express = require('express');
 const path = require('path');
-const logger = require('morgan');
+const fs = require('fs');
+
+const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const cookieSession = require('cookie-session');
+const webpack = require('webpack');
+const session = require('express-session');
 const mongoose = require('mongoose');
-
-// routes
-const indexRoute = require('./routes/index');
 
 const app = express();
 
-// Connect to MongoDB server on localhost, db name to be changed
-// mongoose.connect('mongodb://127.0.0.1:27017/mongodb_tutorial');
-// const conn = mongoose.connection;
+// path for view files
+const VIEWPATH = path.resolve(__dirname, './views/');
 
-// view engine setup
-// indicates where the view files are located
-app.set('views', path.join(__dirname, 'views'));
-// sets the ejs engine to render .html files
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
-
-// set logger
-app.use(logger('dev'));
-
-// body parsers and cookies
+// body parsers & cookie parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(cookieSession({
-  name: 'session',
-  keys: ['CMPS115TeamFive'],
-  maxAge: 3600000,
+
+// TODO: on session tutorial https://velopert.com/406
+app.use(session({
+  secret: 'webaudio-secret$$',
+  resave: false,  // TODO: ??
+  saveUninitialized: true,
 }));
 
-// indicate the location of static files
+// indicate static file serve directories
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/dist', express.static(path.join(__dirname, 'dist')));
 
-// routes
-app.use('/', indexRoute);
+// set view engine to pure html
+app.set('view engine', 'html');
+app.set('views', './views');
 
+// send index.html at default GET
+app.get('/', (req, res, next) => {
+  res  // test cookie
+    .cookie('name', 'dansuh', { maxAge: 360000 })  // cookies expire after 360s
+    .sendFile(path.resolve(__dirname, 'index.html'));
+});
+
+// sign-in page
+app.get('/signin', (req, res) => {
+  res.sendFile(path.resolve(VIEWPATH, 'signin.html'));
+});
+
+// request sample track
+app.get('/audio/:trackname', (req, res) => {
+  const trackName = req.params.trackname;
+  const starcraftTrack = path.resolve(__dirname, `./public/sample_tracks/${trackName}.mp3`);
+  const readStream = fs.createReadStream(starcraftTrack);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    console.log('Reading file completed : ' + starcraftTrack);
+  });
+});
+
+// not found message
 app.use((req, res, next) => {
   const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-// export express app
-module.exports = app;
+// run the server on development mode
+if (process.env.NODE_ENV === 'development') {
+  const devPort = process.env.DEVPORT || 8080;
+
+  const webpackDevServer = require('webpack-dev-server');
+  const webpackConfig = require('./webpack.config');
+  const compiler = webpack(webpackConfig);
+  const devServer = new webpackDevServer(compiler, webpackConfig.devServer);
+
+  // start listening
+  devServer.listen(devPort, () => {
+    console.log('Dev Server listening on : ' + devPort);
+  });
+}
+
+// start listening
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log('Server listening on: ' + port);
+});

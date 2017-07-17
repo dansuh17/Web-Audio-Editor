@@ -1,17 +1,14 @@
-import $ from 'jquery';
-import 'dist/css/bootstrap.css';
-import 'dist/css/bootstrap-toggle.css';
-import 'dist/js/bootstrap.min.js';
-import 'dist/js/bootstrap-toggle.min.js';
-import 'css/index.css';
+import '../index.html';  // required for hot-loading for changes in index.html
+import Tracks from 'tracks';
+import Toolbox from 'toolbox';
+import SampleTrackLoader from 'sampletracks';
 
-import WaveList from 'waveList/waveList.js';
-import WaveListModifier from 'waveList/waveListModifier.js';
+// TODO: what does Symbol.iterator do???
+// setup for using for-of loop for queried dom elements
+NodeList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+HTMLCollection.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
 
-
-$(document).ready(function() {
-    let waveList = WaveList.create({container: "#waveList"});
-    let audioLibrary = {};
-    let workspaceLibrary = {};
-    let waveListModifier = WaveListModifier.create(waveList, audioLibrary, workspaceLibrary);
-});
+const container = document.getElementById('track-container');
+const tracks = new Tracks(container);
+const toolbox = new Toolbox(container, tracks);
+const sampleTrackLoader = new SampleTrackLoader(tracks);

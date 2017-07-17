@@ -1,10 +1,5 @@
-# UCSC-SE
+# Web Audio Editor
 
-## Baseline
+## Development
 
-`npm install`
-`npm run dev`
-
-then go to 
-
-`localhost:4000`
+`npm install && npm run dev`

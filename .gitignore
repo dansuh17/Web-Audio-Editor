@@ -101,6 +101,7 @@ Temporary Items
 .apdisk
 
 # Project specific files
-build
+dist
 .idea
 *.iml
+*bundle.js
