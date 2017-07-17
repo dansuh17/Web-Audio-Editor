@@ -10,6 +10,9 @@ const webpack = require('webpack');
 
 const app = express();
 
+// path for view files
+const VIEWPATH = path.resolve(__dirname, './views/');
+
 // body parsers & cookie parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -21,12 +24,18 @@ app.use('/dist', express.static(path.join(__dirname, 'dist')));
 
 // set view engine to pure html
 app.set('view engine', 'html');
+app.set('views', './views');
 
 // send index.html at default GET
 app.get('/', (req, res, next) => {
   res  // test cookie
     .cookie('name', 'dansuh', { maxAge: 360000 })  // cookies expire after 360s
     .sendFile(path.resolve(__dirname, 'index.html'));
+});
+
+// sign-in page
+app.get('/signin', (req, res) => {
+  res.sendFile(path.resolve(VIEWPATH, 'signin.html'));
 });
 
 // request sample track

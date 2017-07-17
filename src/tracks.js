@@ -16,6 +16,7 @@ class Tracks {
     this.play = this.play.bind(this);
     this.stop = this.stop.bind(this);
     this.pause = this.pause.bind(this);
+    this.downloadFile = this.downloadFile.bind(this);
 
     this.trackIndex = 0;
     this.container = container;
@@ -99,6 +100,10 @@ class Tracks {
             <input type="file" id="fileinput${trackId}"
             data-trackid="${trackId}"/>
           </label>
+          <button type="button" class="btn btn-secondary"
+          data-trackid="${trackId}" id="download${trackId}">
+            Download File
+          </button>
         </div>
       </div>
       `;
@@ -131,10 +136,27 @@ class Tracks {
     const pauseButton = document.getElementById(`pause${trackId}`);
     pauseButton.addEventListener('click', this.pause, false);
 
+    const downloadFileBtn = document.getElementById(`download${trackId}`);
+    downloadFileBtn.addEventListener('click', this.downloadFile, false);
+
     // increase track number
     this.increaseTrackNum();
 
     return trackId;
+  }
+
+  /**
+   * Trigger file download.
+   * @param e event node
+   */
+  downloadFile(e) {
+    const id = e.target.dataset.trackid;
+    const fileUrl = this.tracks[id].fileUrl;
+    if (fileUrl) {
+      window.open(fileUrl);
+    } else {
+      alert('Cannot download file: please provide file first.');
+    }
   }
 
   /**
@@ -164,7 +186,6 @@ class Tracks {
 
   /**
    * Reads a file when the user uploads an audio file. Then triggers to draw the viz.
-   *
    * @param e event
    */
   readSingleFile(e) {
@@ -173,6 +194,9 @@ class Tracks {
     if (!file) {
       return;
     }
+
+    // store the URL
+    this.tracks[id].fileUrl = URL.createObjectURL(file);
     const reader = new FileReader();
 
     // when the load is complete, draw the id
@@ -348,7 +372,11 @@ class Tracks {
    */
   eraseWave(trackId) {
     const trackBox = this.tracks[trackId].trackelem;
-    trackBox.removeChild(trackBox.lastChild);
+
+    // erase the wave only if there already exists visualized wave
+    if (trackBox.lastChild.tagName === 'svg') {
+      trackBox.removeChild(trackBox.lastChild);
+    }
   }
 
   /**
@@ -359,6 +387,7 @@ class Tracks {
    * @param trackId{int} the track id number
    */
   drawWave(fileArrayBuffer, audioCtx, trackId) {
+    this.eraseWave(trackId);  // first erase the wave if already exists
     // returns AudioBuffer object as a result of decoding the audio
     audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
       this.renderWave(buffer, audioCtx, trackId);

@@ -8,14 +8,28 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <nav class="navbar navbar-light navbar-fixed-top bg-faded">
+  <!-- navigation bar -->
+  <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
     <a class="navbar-brand" href="#">Web Audio Editor</a>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/signin">Sign In<span class="sr-only">(current)</span></a>
+        <a class="nav-item nav-link" href="#">Features</a>
+        <a class="nav-item nav-link" href="#">Pricing</a>
+      </div>
+    </div>
   </nav>
+  <!-- navbar end -->
+
   <!-- high-level container containing multiple tracks -->
   <div class="container" id="track-container">
     <!-- Tracks go here. -->
   </div>
   <!-- container end -->
+
   <script src="./dist/index.bundle.js"></script>
 </body>
 </html>
