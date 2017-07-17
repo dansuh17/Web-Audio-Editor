@@ -94,6 +94,7 @@ export default class WaveList {
 
 
     $(container).append(newRowtag);
+    $("#mute" + waveformNum).bootstrapToggle();
   }
 
   addWaveForm(waveformNum) {
@@ -161,6 +162,18 @@ export default class WaveList {
     });
     $("#upload" + waveformNum).change(function () {
       wsInstance.loadBlob(this.files[0]);
+    });
+
+    $("#save" + waveformNum).click(function() {
+        FileDownloader.saveToWav(wsInstance.backend.buffer, 1);
+    }.bind(this));
+
+    $("#volume" + waveformNum).on("input", (function() {
+        wsInstance.setVolume(this.value / 100.0);
+    }));
+
+    $("#mute" + waveformNum).change(function() {
+        wsInstance.toggleMute();
     });
   }
 

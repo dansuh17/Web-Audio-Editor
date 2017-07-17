@@ -59,8 +59,48 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="row">
+                            <div id="mute" class="btn-group btn-toggle col-md-12">
+                                <button id="mute_on" class="btn btn-sm btn-primary">ALL ON</button>
+                                <button id="mute_off" class="btn btn-sm btn-default">ALL OFF</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-10">
+                      <div class="row">
+                          <div class="col-md-12">
+                              <button id="fade_in" class="btn btn-sm btn-default">Fade in</button>
+                              <button id="fade_out" class="btn btn-sm btn-default">Fade out</button>
+                              <button id="trim" class="btn btn-sm btn-default">Trim</button>
+                              <button id="copy" class="btn btn-sm btn-default">Copy</button>
+                              <button id="cut" class="btn btn-sm btn-default">Cut</button>
+                              <button id="paste" class="btn btn-sm btn-default">Paste</button>
+                              <button id="zoom_in" type="button" class="btn btn-default btn-sm">
+                                  <span class="glyphicon glyphicon-zoom-in"></span> Zoom-in
+                              </button>
+                              <button id="zoom_out" type="button" class="btn btn-default btn-sm">
+                                  <span class="glyphicon glyphicon-zoom-out"></span> Zoom-out
+                              </button>
+                          </div>
+                      </div>
+                      <div class="row">
+                          <div class="col-md-12">
+                              <span>
+                                  <button id="volume" class="btn btn-sm btn-default">Change volume</button>
+                                  <input type="number" id="volume-ratio" min="50" max="200" value="100">
+                                  %
+                              </span>
+                              <span>
+                                  <button id="pitch" class="btn btn-sm btn-default">Change pitch</button>
+                                  <input type="number" id="pitch-key" min="-12" max="12" value="0">
+                              </span>
+                              <span>
+                                  <button id="speed" class="btn btn-sm btn-default">Change speed</button>
+                                  <input type="number" id="speed-ratio" min="50" max="200" value="100">
+                                  %
+                              </span>
+                          </div>
+                      </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div id="waveform-timeline">
