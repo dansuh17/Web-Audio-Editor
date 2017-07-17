@@ -77,7 +77,7 @@ class Tracks {
   createTrack(container) {
     const trackId = this.trackIndex;
     const elemString = `
-      <div class="row align-items-center" id="track${trackId}"
+      <div class="row align-items-center" id="trackbox${trackId}"
       data-trackid="${trackId}">
         <div class="col">
           <div class="btn-group" role="group">
@@ -106,7 +106,7 @@ class Tracks {
     // indicate which track the user is now selecting
 
     container.insertAdjacentHTML('beforeend', elemString);
-    const createdTrack = document.getElementById(`track${trackId}`);
+    const createdTrack = document.getElementById(`trackbox${trackId}`);
     // indicate which track the user is now selecting
     createdTrack.addEventListener('click', () => {
       this.currentTrackId = trackId;
@@ -144,6 +144,7 @@ class Tracks {
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
     const newAudioBuffer = this.tracks[id].audioSource.cut(segmentData);
+    this.eraseWave(id);
     this.renderWave(newAudioBuffer, this.audioCtx, id);  // draw the track waveform again
   }
 
@@ -244,7 +245,7 @@ class Tracks {
    */
   renderWave(audioBuffer, audioCtx, trackId) {
     console.log(audioBuffer);
-    const $track = document.querySelector(`#track${trackId}`);
+    const $track = document.querySelector(`#trackbox${trackId}`);
     const width = $track.getBoundingClientRect().width;
     const timeAxisHeight = 18;
     const layerHeight = 200;
@@ -341,11 +342,13 @@ class Tracks {
   }
 
   /**
-   * Erases the wave given the id.
+   * Erases the waveform given the id.
+   * It essentially removes the 'svg' part that wraps the visualization.
    * @param trackId {number} track identification
    */
   eraseWave(trackId) {
-    // TODO:
+    const trackBox = this.tracks[trackId].trackelem;
+    trackBox.removeChild(trackBox.lastChild);
   }
 
   /**
