@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" />
+  <!-- 아 정말 jquery는 쓰고 싶지 않았지만... -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/css/signup.css">
+</head>
+<body>
+<div class="container">
+  <div class="row justify-content-center full-screen-height">
+    <div class="col-6 align-self-center">
+
+      <!-- form section -->
+      <form id="signupform">
+        <div class="form-group">
+          <label for="signup-userinput">User Name</label>
+          <input type="email" class="form-control" id="signup-userinput"
+                 aria-describedby="emailHelp" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" class="form-control" id="signup-password" placeholder="Password">
+        </div>
+        <div class="form-group">
+          <label for="signup-name">Name</label>
+          <input type="text" class="form-control" id="signup-name" placeholder="User Id (Name)">
+        </div>
+        <button type="submit" class="btn btn-primary" id="signup-btn">
+          Sign Up
+        </button>
+      </form>
+      <!-- form section end -->
+
+    </div>
+  </div>
+</div>
+<script src="../dist/signup.bundle.js"></script>
+</body>
+</html>

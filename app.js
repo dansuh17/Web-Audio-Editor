@@ -74,6 +74,11 @@ app.get('/signin', (req, res) => {
   res.sendFile(path.resolve(VIEWPATH, 'signin.html'));
 });
 
+// sign-up page
+app.get('/signup', (req, res) => {
+  res.sendFile(path.resolve(VIEWPATH, 'signup.html'));
+});
+
 // sign-in request
 app.post('/post/signin', (req, res) => {
   const username = req.body.username;
@@ -90,10 +95,31 @@ app.post('/post/signin', (req, res) => {
         req.session.save();
         res.status(200).send({ username });
       } else {
-        res.status(420).send('Incorrect Password');
+        res.status(420).send('Incorrect password.');
       }
     } else {
       res.status(420).send('Username does not exist.');
+    }
+  });
+});
+
+// signup request
+app.post('/post/signup', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const name = req.body.name;
+
+  // try to save user information, unless the username already exists
+  const user = new User({
+    username,
+    password,
+    name
+  });
+  user.save((err, userDoc) => {
+    if (err) {
+      res.status(420).send('User name already exists!');
+    } else {
+      res.sendStatus(200);
     }
   });
 });

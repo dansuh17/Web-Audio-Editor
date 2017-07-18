@@ -8,6 +8,7 @@ module.exports = {
   entry: {
     index: './src/index.js',
     signin: './src/signin.js',
+    signup: './src/signup.js',
   },
   output: {
     filename: '[name].bundle.js',  // [name] is the entry key
