@@ -53,6 +53,7 @@ class Toolbox {
                 Low Pass Filter
               </button>
             </div>
+            
             <!-- mode selection -->
             <div class="btn-group" role="group">
               <button type="button" name="mode" value="zoom" class="btn btn-primary">

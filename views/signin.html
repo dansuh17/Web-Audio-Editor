@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign Up</title>
+  <title>Sign In</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" />
   <!-- 아 정말 jquery는 쓰고 싶지 않았지만... -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -13,21 +13,27 @@
   <div class="container">
     <div class="row justify-content-center full-screen-height">
       <div class="col-6 align-self-center">
-        <form>
+
+        <!-- form section -->
+        <form id="signinform">
           <div class="form-group">
-            <label for="exampleInputEmail1">User Name</label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+            <label for="signin-userinput">User Name</label>
+            <input type="email" class="form-control" id="signin-userinput"
+                   aria-describedby="emailHelp" placeholder="Enter email">
           </div>
           <div class="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+            <label for="signin-password">Password</label>
+            <input type="password" class="form-control" id="signin-password" placeholder="Password">
           </div>
-          <button class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" id="signin-btn">
             Sign In
           </button>
         </form>
+        <!-- form section end -->
+
       </div>
     </div>
   </div>
+  <script src="../dist/signin.bundle.js"></script>
 </body>
 </html>

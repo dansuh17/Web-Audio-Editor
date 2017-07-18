@@ -7,6 +7,7 @@ module.exports = {
   context: __dirname,  // working directory
   entry: {
     index: './src/index.js',
+    signin: './src/signin.js',
   },
   output: {
     filename: '[name].bundle.js',  // [name] is the entry key

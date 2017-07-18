@@ -197,6 +197,7 @@ class Tracks {
 
     // store the URL
     this.tracks[id].fileUrl = URL.createObjectURL(file);
+    this.tracks[id].file = file;
     const reader = new FileReader();
 
     // when the load is complete, draw the id

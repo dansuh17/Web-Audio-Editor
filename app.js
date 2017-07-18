@@ -15,6 +15,26 @@ const app = express();
 // path for view files
 const VIEWPATH = path.resolve(__dirname, './views/');
 
+// database settings
+mongoose.connect('mongodb://localhost:38128/webaudio');
+const db = mongoose.connection;
+db.once('open', () => { console.log('Database connected.'); });
+db.on('error', console.error.bind(console, 'connection error:'));
+const Schema = mongoose.Schema;
+
+// create a schema for the user
+const userSchema = new Schema({
+  username: { type: String, required: true, index: { unique: true }},
+  name: { type: String },
+  password: { type: String, required: true },
+  library: [{
+    audiotitle: String,
+    url: String,
+  }],
+});
+const User = mongoose.model('user', userSchema);  // collection name === 'users'
+
+
 // body parsers & cookie parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,8 +43,12 @@ app.use(cookieParser());
 // TODO: on session tutorial https://velopert.com/406
 app.use(session({
   secret: 'webaudio-secret$$',
-  resave: false,  // TODO: ??
+  resave: true,
   saveUninitialized: true,
+  cookie: {
+    httpOnly: false,
+    secure: false,
+  },
 }));
 
 // indicate static file serve directories
@@ -37,14 +61,54 @@ app.set('views', './views');
 
 // send index.html at default GET
 app.get('/', (req, res, next) => {
+  const sess = req.session;
+
   res  // test cookie
-    .cookie('name', 'dansuh', { maxAge: 360000 })  // cookies expire after 360s
+    .cookie('name', sess.name, { maxAge: 360000 })  // cookies expire after 360s
+    .cookie('username', sess.username, { maxAge: 360000 })  // cookies expire after 360s
     .sendFile(path.resolve(__dirname, 'index.html'));
 });
 
 // sign-in page
 app.get('/signin', (req, res) => {
   res.sendFile(path.resolve(VIEWPATH, 'signin.html'));
+});
+
+// sign-in request
+app.post('/post/signin', (req, res) => {
+  const username = req.body.username;
+
+  User.findOne({ username: username }, 'username name password', (err, userDoc) => {
+    if (userDoc) {
+      if (userDoc.password === req.body.password) {  // check for password
+        if (userDoc.name) {
+          req.session.name = userDoc.name;
+        } else {
+          req.session.name = userDoc.username;
+        }
+        req.session.username = userDoc.username;
+        req.session.save();
+        res.status(200).send({ username });
+      } else {
+        res.status(420).send('Incorrect Password');
+      }
+    } else {
+      res.status(420).send('Username does not exist.');
+    }
+  });
+});
+
+// logout request
+app.get('/logout', (req, res) => {
+  const sess = req.session;
+  // if there is a user logged in, destroy the session
+  if (sess.username) {
+    sess.destroy(err => {
+      if (err) console.error(err);
+    });
+  }
+
+  res.redirect('/');
 });
 
 // request sample track
