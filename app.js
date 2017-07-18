@@ -15,6 +15,7 @@ const app = express();
 // path for view files
 const VIEWPATH = path.resolve(__dirname, './views/');
 
+
 // database settings
 mongoose.connect('mongodb://localhost:38128/webaudio');
 const db = mongoose.connection;
@@ -87,6 +88,7 @@ app.post('/post/signin', (req, res) => {
     if (userDoc) {
       if (userDoc.password === req.body.password) {  // check for password
         if (userDoc.name) {
+          // make sure 'credentials: include' for fetch api!
           req.session.name = userDoc.name;
         } else {
           req.session.name = userDoc.username;
