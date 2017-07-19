@@ -192,18 +192,22 @@ app.post('/upload', (req, res) => {
 
     // save the file information in the database
     const username = fields.username;
+    console.log(username);
     const filename = files.file.name;
     const filepath = files.file.path;
     User.findOneAndUpdate(
       { username: username },
       {
         $push: {
-          library: {
+          library: {  // push into library field
             audiotitle: filename,
             url: filepath,
           }}
-      }
-    );
+      }, (err, userDoc) => {
+        if (err) {
+          console.error(err);
+        }
+      });
   });
 });
 

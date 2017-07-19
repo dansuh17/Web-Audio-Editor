@@ -162,6 +162,7 @@ class Tracks {
     const id = e.target.dataset.trackid;
     const file = this.tracks[id].file;
 
+    // check the cookies to see if the user is logged in
     const cookies = cookieParser.parse(document.cookie);
     if (cookies.name === 'undefined') {
       alert('You must login before you can upload files.');
@@ -176,6 +177,9 @@ class Tracks {
 
     const data = new FormData();
     const filename = window.prompt('Please give a name to the file');
+    if (filename === null || filename === undefined) {
+      return;
+    }
     data.append('file', file, filename);  // provide the filename
     data.append('user', cookies.name);  // send the user name also
     data.append('username', cookies.username);
