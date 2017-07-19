@@ -7,6 +7,6 @@
 
 ## Development
 
-`mongodb --port 38128`
+`mongod --port 38128`
 
 `npm install && npm run dev`
