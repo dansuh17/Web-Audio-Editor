@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+
+    <script src="/dist/js/pace.min.js"></script>
+    <link rel="stylesheet" href="/dist/css/pace.css"/>
+    <script src="/build/index.bundle.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                  data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">
+            <span class="glyphicon glyphicon-signal"></span>
+            <%= title %>
+          </a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Workspace</a></li>
+            <li><a href="/library">Library</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/signup"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+            <li><a href="/signin"><span class="glyphicon glyphicon-log-in"></span> Sign In</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+     <div class="container">
+            <div id="waveContent" class="waveform-body" data-workspaceId="<%= workspaceId %>">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button id="play" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-play"></span>
+                                </button>
+                                <button id="pause" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-pause"></span>
+                                </button>
+                                <button id="stop" class="btn btn-sm btn-default">
+                                    <span class="glyphicon glyphicon-stop"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="mute" class="btn-group btn-toggle col-md-12">
+                                <button id="mute_on" class="btn btn-sm btn-primary">ALL ON</button>
+                                <button id="mute_off" class="btn btn-sm btn-default">ALL OFF</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                      <div class="row">
+                          <div class="col-md-12">
+                              <button id="fade_in" class="btn btn-sm btn-default">Fade in</button>
+                              <button id="fade_out" class="btn btn-sm btn-default">Fade out</button>
+                              <button id="trim" class="btn btn-sm btn-default">Trim</button>
+                              <button id="copy" class="btn btn-sm btn-default">Copy</button>
+                              <button id="cut" class="btn btn-sm btn-default">Cut</button>
+                              <button id="paste" class="btn btn-sm btn-default">Paste</button>
+                              <button id="zoom_in" type="button" class="btn btn-default btn-sm">
+                                  <span class="glyphicon glyphicon-zoom-in"></span> Zoom-in
+                              </button>
+                              <button id="zoom_out" type="button" class="btn btn-default btn-sm">
+                                  <span class="glyphicon glyphicon-zoom-out"></span> Zoom-out
+                              </button>
+                          </div>
+                      </div>
+                      <div class="row">
+                          <div class="col-md-12">
+                              <span>
+                                  <button id="volume" class="btn btn-sm btn-default">Change volume</button>
+                                  <input type="number" id="volume-ratio" min="50" max="200" value="100">
+                                  %
+                              </span>
+                              <span>
+                                  <button id="pitch" class="btn btn-sm btn-default">Change pitch</button>
+                                  <input type="number" id="pitch-key" min="-12" max="12" value="0">
+                              </span>
+                              <span>
+                                  <button id="speed" class="btn btn-sm btn-default">Change speed</button>
+                                  <input type="number" id="speed-ratio" min="50" max="200" value="100">
+                                  %
+                              </span>
+                          </div>
+                      </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="waveform-timeline">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br/>
+
+                <div id="waveList">
+               </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button id="addRow" style="height:100px; width:100%; font-size:20px"> Add Track</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="snackbar"></div>
+        <div id="loading"></div>
+
+  </body>
+</html>
