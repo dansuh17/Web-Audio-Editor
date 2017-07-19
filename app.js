@@ -15,6 +15,10 @@ const app = express();
 // path for view files
 const VIEWPATH = path.resolve(__dirname, './views/');
 
+// create the uploads folder to save user-uploaded audio
+if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
+  fs.mkdirSync(path.resolve(__dirname, './uploads'));
+}
 
 // database settings
 mongoose.connect('mongodb://localhost:38128/webaudio');
@@ -148,6 +152,58 @@ app.get('/audio/:trackname', (req, res) => {
 
   readStream.on('end', () => {
     console.log('Reading file completed : ' + starcraftTrack);
+  });
+});
+
+// receive file upload
+const formidable = require('formidable');
+app.post('/upload', (req, res) => {
+  // needs a session being maintained (logged in)
+  if (!req.session.name) {
+    res.status(420).send('Session information unavailable!');
+  }
+
+  const form = new formidable.IncomingForm();
+  form.uploadDir = path.resolve(__dirname, './uploads');
+  form.type = true;  // keep the extension for the file being saved
+
+  form.addListener('end', () => {
+    console.log(`File upload completed: ${req.session.id}`);
+    res.end();
+  });
+
+  // done reading file
+  form.addListener('file', (name, file) => {
+    res.status(200);
+  });
+
+  // set error
+  form.addListener('error', (err) => {
+    console.error(err);
+    res.status(420);
+  });
+
+  // parse information about the file that has been received
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    // save the file information in the database
+    const username = fields.username;
+    const filename = files.file.name;
+    const filepath = files.file.path;
+    User.findOneAndUpdate(
+      { username: username },
+      {
+        $push: {
+          library: {
+            audiotitle: filename,
+            url: filepath,
+          }}
+      }
+    );
   });
 });
 

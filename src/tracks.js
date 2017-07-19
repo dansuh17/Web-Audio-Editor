@@ -1,5 +1,6 @@
 import wavesUI from 'waves-ui';
 import AudioSourceWrapper from 'audiosource';
+import cookieParser from 'cookie';
 
 
 class Tracks {
@@ -17,6 +18,7 @@ class Tracks {
     this.stop = this.stop.bind(this);
     this.pause = this.pause.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
+    this.uploadFile = this.uploadFile.bind(this);
 
     this.trackIndex = 0;
     this.container = container;
@@ -152,11 +154,50 @@ class Tracks {
     return trackId;
   }
 
+  /**
+   * Upload a file loaded on the track.
+   * @param e event node
+   */
   uploadFile(e) {
     const id = e.target.dataset.trackid;
-
-    // store the URL
     const file = this.tracks[id].file;
+
+    const cookies = cookieParser.parse(document.cookie);
+    if (cookies.name === 'undefined') {
+      alert('You must login before you can upload files.');
+      return;
+    }
+
+    // check for file existence
+    if (file === undefined || file === null) {
+      alert('Cannot upload file');
+      return;
+    }
+
+    const data = new FormData();
+    const filename = window.prompt('Please give a name to the file');
+    data.append('file', file, filename);  // provide the filename
+    data.append('user', cookies.name);  // send the user name also
+    data.append('username', cookies.username);
+
+    const fetchOptions = {
+      // no need to set headers for using formidable.
+      // https://stackoverflow.com/questions/6884382/node-js-formidable-upload-with-xhr
+      credentials: 'include',
+      method: 'post',
+      body: data,
+    };
+
+    fetch('/upload', fetchOptions).then((res) => {
+      if (res.ok) {
+        alert(`Upload successful: ${filename}`);
+      } else {
+        throw res.statusMessage;
+      }
+    }).catch((err) => {
+      console.err(err);
+      alert(err);
+    });
   }
 
   /**
@@ -165,12 +206,19 @@ class Tracks {
    */
   downloadFile(e) {
     const id = e.target.dataset.trackid;
-    const buffer = this.tracks[id].audioSource.buffer;
+    // TODO: download file that the user made changes to!
+    const file = this.tracks[id].file;
+
+    if (file === undefined || file === null) {
+      alert('Cannot download file.');
+      return;
+    }
 
     const pom = document.createElement('a');
     pom.setAttribute('href', URL.createObjectURL(file));
     pom.setAttribute('download', 'sample.mp3');
 
+    // create and attach a click event to the element created - automatically start download
     if (document.createEvent) {
       const event = document.createEvent('MouseEvents');
       event.initEvent('click', true, true);

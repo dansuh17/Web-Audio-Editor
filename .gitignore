@@ -105,3 +105,4 @@ dist
 .idea
 *.iml
 *bundle.js
+uploads/
