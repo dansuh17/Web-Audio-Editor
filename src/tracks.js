@@ -104,6 +104,10 @@ class Tracks {
           data-trackid="${trackId}" id="download${trackId}">
             Download File
           </button>
+          <button type="button" class="btn btn-secondary"
+          data-trackid="${trackId}" id="upload${trackId}">
+            Upload File
+          </button>
         </div>
       </div>
       `;
@@ -139,10 +143,20 @@ class Tracks {
     const downloadFileBtn = document.getElementById(`download${trackId}`);
     downloadFileBtn.addEventListener('click', this.downloadFile, false);
 
+    const uploadFileBtn = document.getElementById(`upload${trackId}`);
+    uploadFileBtn.addEventListener('click', this.uploadFile, false);
+
     // increase track number
     this.increaseTrackNum();
 
     return trackId;
+  }
+
+  uploadFile(e) {
+    const id = e.target.dataset.trackid;
+
+    // store the URL
+    const file = this.tracks[id].file;
   }
 
   /**
@@ -151,11 +165,18 @@ class Tracks {
    */
   downloadFile(e) {
     const id = e.target.dataset.trackid;
-    const fileUrl = this.tracks[id].fileUrl;
-    if (fileUrl) {
-      window.open(fileUrl);
+    const buffer = this.tracks[id].audioSource.buffer;
+
+    const pom = document.createElement('a');
+    pom.setAttribute('href', URL.createObjectURL(file));
+    pom.setAttribute('download', 'sample.mp3');
+
+    if (document.createEvent) {
+      const event = document.createEvent('MouseEvents');
+      event.initEvent('click', true, true);
+      pom.dispatchEvent(event);
     } else {
-      alert('Cannot download file: please provide file first.');
+      pom.click();
     }
   }
 
@@ -168,6 +189,14 @@ class Tracks {
     const newAudioBuffer = this.tracks[id].audioSource.cut(segmentData);
     this.eraseWave(id);
     this.renderWave(newAudioBuffer, this.audioCtx, id);  // draw the track waveform again
+  }
+
+  leaveSelection() {
+    const id = this.currentTrackId;
+    const segmentData = this.getSegmentData(id);
+    const newAudioBuffer = this.tracks[id].audioSource.leave(segmentData);
+    this.eraseWave(id);
+    this.renderWave(newAudioBuffer, this.audioCtx, id);
   }
 
   /**

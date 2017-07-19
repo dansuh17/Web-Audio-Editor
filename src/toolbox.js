@@ -6,7 +6,6 @@ class Toolbox {
 
     // function binding
     this.createToolbox = this.createToolbox.bind(this);
-
     this.createToolbox();
   }
 
@@ -37,8 +36,8 @@ class Toolbox {
               <button type="button" class="btn btn-secondary" id="cutBtn">
                 Cut
               </button>
-              <button type="button" class="btn btn-secondary" id="pasteBtn">
-                Paste
+              <button type="button" class="btn btn-secondary" id="leaveBtn">
+                Leave
               </button>
               <button type="button" class="btn btn-secondary" id="playAllBtn">
                 Play All
@@ -122,6 +121,12 @@ class Toolbox {
     const cutBtn = document.getElementById('cutBtn');
     cutBtn.addEventListener('click', () => {
       this.tracks.cutSelection();
+    });
+
+    // leave selection
+    const leaveBtn = document.getElementById('leaveBtn');
+    leaveBtn.addEventListener('click', () => {
+      this.tracks.leaveSelection();
     });
   }
 }

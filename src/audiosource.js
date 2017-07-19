@@ -21,6 +21,9 @@ class AudioSourceWrapper {
     this.updateCursor = this.updateCursor.bind(this);
   }
 
+  /**
+   * Apply low-pass filter to the entire audio source.
+   */
   applyLpFilter() {
     // define the filter
     const biquadFilter = this.audioCtx.createBiquadFilter();
@@ -33,12 +36,18 @@ class AudioSourceWrapper {
     biquadFilter.connect(this.audioCtx.destination);
   }
 
+  /**
+   * Disconnects the filter from the destination.
+   */
   disconnectFilter() {
     this.filter.disconnect();
     this.source.connect(this.audioCtx.destination);
     this.filter = null;
   }
 
+  /**
+   * Update the cursor's position according to current playback time.
+   */
   updateCursor() {
     this.cursorLayer.currentPosition = this.getCurrentTime();
     this.cursorLayer.update();
@@ -46,6 +55,11 @@ class AudioSourceWrapper {
     window.requestAnimationFrame(this.updateCursor);
   }
 
+  /**
+   * Play the source buffer. Web Audio API forces to create new AudioBufferSource
+   * for every playback. Once it begins playing, it cannot be played again,
+   * although stop() can be called multiple times.
+   */
   play() {
     const newSource = this.audioCtx.createBufferSource();
     newSource.buffer = this.buffer;
@@ -68,6 +82,15 @@ class AudioSourceWrapper {
     if (!this.updatingCursor) {
       this.updateCursor();
       this.updatingCursor = true;
+    }
+  }
+
+  /**
+   * Disconnects the source from whatever it is connected to.
+   */
+  disconnectSource() {
+    if (this.source) {
+      this.source.disconnect();
     }
   }
 
@@ -108,10 +131,50 @@ class AudioSourceWrapper {
     }
 
     // allocate new buffer
+    this.disconnectSource();
     this.buffer = newBuffer;
     return newBuffer;
   }
 
+  /**
+   * Leave the selection and discard everywhere else.
+   * @param data selected segment data
+   * @returns {AudioBuffer} the new audio buffer created
+   */
+  leave(data) {
+    // cut out the selected data!
+    const start = data.start;  // in seconds!
+    const duration = data.duration;
+
+    const buffer = this.buffer;
+    const numChannels = this.buffer.numberOfChannels;
+
+    // calculate buffer info
+    const sampleRate = this.audioCtx.sampleRate;
+    const startFrame = Math.floor(start * sampleRate);
+    const durationInFrames = Math.floor(duration * sampleRate);
+
+    const newBuffer = this.audioCtx.createBuffer(numChannels, durationInFrames, sampleRate);
+
+    // copy contents into the new buffer
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const nowBuffer = newBuffer.getChannelData(channel);
+
+      for (let i = startFrame; i < durationInFrames + startFrame; i++) {
+        nowBuffer[i - startFrame] = oldBufferChannelData[i];
+      }
+    }
+
+    // allocate new buffer
+    this.buffer = newBuffer;
+    this.disconnectSource();
+    return newBuffer;
+  }
+
+  /**
+   * Stop the source from playing and retreat the cursor to 0.
+   */
   stop() {
     if (this.source) {
       this.source.disconnect();
@@ -124,12 +187,29 @@ class AudioSourceWrapper {
     this.isPlaying = false;
   }
 
+  /**
+   * Pause the source.
+   */
   pause() {
-    const elapsed = this.audioCtx.currentTime - this.startedAt;
+    let elapsed = this.audioCtx.currentTime - this.startedAt;
+
+    const buffer = this.buffer;
+    const numFrames = buffer.length;
+    console.log(numFrames);
+    console.log(elapsed);
+
+    if ((numFrames / this.audioCtx.sampleRate) < elapsed) {
+      elapsed = 0;
+    }
+
     this.stop();
     this.pausedAt = elapsed;
   }
 
+  /**
+   * Returns the current playback time
+   * @returns {Number} current time
+   */
   getCurrentTime() {
     if (this.pausedAt !== 0) {
       return this.pausedAt;
