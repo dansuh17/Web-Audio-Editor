@@ -98,10 +98,8 @@ class Tracks {
             </button>
           </div>
           <br />
-          <label class="btn btn-info">
-            <input type="file" id="fileinput${trackId}"
+          <input type="file" id="fileinput${trackId}"
             data-trackid="${trackId}"/>
-          </label>
           <button type="button" class="btn btn-secondary"
           data-trackid="${trackId}" id="download${trackId}">
             Download File

@@ -211,6 +211,45 @@ app.post('/upload', (req, res) => {
   });
 });
 
+// request library information
+app.get('/library/:username', (req, res) => {
+  const username = req.params.username;
+  if (username === 'undefined') {
+    res.status(420).send('Must be logged in!');
+    return;
+  }
+
+  // find the user information and its library
+  User.findOne({ username: username }, 'username name library', (err, userDoc) => {
+    if (err) res.status(420).end();
+
+    if (userDoc) {
+      const library = userDoc.library;
+      res.json(library);  // send the json data
+    } else {
+      res.status(420).send('No user information found.');
+    }
+  });
+});
+
+// return the audio upon user request on library-stored audio
+app.get('/useraudio/:username/:url', (req, res) => {
+  const username = req.params.username;
+  const url = req.params.url;
+  if (username === 'null') {
+    res.status(420).send('The user is not logged in! (how does this happen?)');
+    return;
+  }
+
+  console.log(url);
+  const readStream = fs.createReadStream(url);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    console.log('Sending library file completed : ' + url);
+  });
+});
+
 // not found message
 app.use((req, res, next) => {
   const err = new Error('Not Found');

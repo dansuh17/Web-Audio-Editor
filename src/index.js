@@ -3,6 +3,7 @@ import Tracks from 'tracks';
 import Toolbox from 'toolbox';
 import SampleTrackLoader from 'sampletracks';
 import cookieParser from 'cookie';
+import Library from 'library';
 
 // TODO: what does Symbol.iterator do???
 // setup for using for-of loop for queried dom elements
@@ -20,7 +21,10 @@ if (cookies.name !== 'undefined') {
   signupNav.href = '/logout';   // this will directly call logout api to the server
 }
 
+
 const container = document.getElementById('track-container');
 const tracks = new Tracks(container);
 const toolbox = new Toolbox(container, tracks);
+const library = new Library(tracks);
+library.createModalElem();
 const sampleTrackLoader = new SampleTrackLoader(tracks);
