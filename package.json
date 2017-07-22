@@ -8,7 +8,7 @@
     "build": "npm run clean && webpack --color",
     "dev": "NODE_ENV=development node app.js",
     "start": "NODE_ENV=production node app.js",
-    "test": "mocha --compilers js:babel-register"
+    "test": "mocha --timeout 10000"
   },
   "repository": {
     "type": "git",
@@ -22,9 +22,13 @@
   },
   "homepage": "https://github.com/sunjae1294/UCSC-SE#readme",
   "devDependencies": {
+    "chai": "^4.1.0",
+    "chai-http": "^3.0.0",
     "mocha": "^3.4.2",
+    "really-need": "^1.9.2",
     "sinon": "^2.3.8",
     "sinon-mongoose": "^2.0.2",
+    "supertest": "^3.0.0",
     "webpack-dev-server": "^2.5.1"
   },
   "dependencies": {

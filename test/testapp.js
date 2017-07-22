@@ -1,9 +1,21 @@
+process.env.NODE_ENV = 'test';
+
 const assert = require('assert');
-const it = require("mocha").it;
-const describe = require("mocha").describe;
+const it = require('mocha').it;
+const describe = require('mocha').describe;
+const beforeEach = require('mocha').beforeEach;
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const should = require('chai').should();
 const sinon = require('sinon');
+const supertest = require('supertest');
 const User = require('../models/user');
+const server = require('../app');
+
 require('sinon-mongoose');
+chai.use(chaiHttp);
+chai.use(chaiDom);
+
 
 describe('Array', function() {
   describe('#indexOf()', function() {
@@ -12,6 +24,7 @@ describe('Array', function() {
     });
   });
 });
+
 
 describe('Mongoose User Schema Test', function() {
   const UserMock = sinon.mock(User);
@@ -52,5 +65,52 @@ describe('Mongoose User Schema Test', function() {
       assert.equal(result, 'RESULT');
       done();
     });
+  });
+});
+
+
+describe('Test Express Server', function() {
+  beforeEach(function(done) {
+    // remove all User data instances for test database before testing
+    User.remove({}, (err) => {
+      done();
+    })
+  });
+
+  it('responds to /', (done) => {
+    chai.request(server)
+      .get('/')
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      });
+  });
+
+  it('responds to /signin', (done) => {
+    chai.request(server)
+      .get('/signin')
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  });
+
+  it('responds to /signup', (done) => {
+    "use strict";
+    chai.request(server)
+      .get('/signup')
+      .end((err, res) => {
+        res.should.have.status(200);
+        done();
+      })
+  });
+
+  it('404 unknown', function (done) {
+    chai.request(server)
+      .get('/blabh')
+      .end((err, res) => {
+        res.should.have.status(404);
+        done();
+      });
   });
 });

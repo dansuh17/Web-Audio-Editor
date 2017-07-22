@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const webpack = require('webpack');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const formidable = require('formidable');
 
 const User = require('./models/user');
 
@@ -22,12 +23,16 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));
 }
 
-// database settings
-mongoose.connect('mongodb://localhost:38128/webaudio');
+let MONGO_URI = 'mongodb://localhost:38128/webaudio';
+if (process.env.NODE_ENV === 'test') {
+  MONGO_URI = 'mongodb://localhost:38128/webaudio-test';
+}
+
+// database setup
+mongoose.connect(MONGO_URI);
 const db = mongoose.connection;
 db.once('open', () => { console.log('Database connected.'); });
 db.on('error', console.error.bind(console, 'connection error:'));
-
 
 // body parsers & cookie parser
 app.use(bodyParser.json());
@@ -60,12 +65,13 @@ app.get('/', (req, res, next) => {
   res  // test cookie
     .cookie('name', sess.name, { maxAge: 360000 })  // cookies expire after 360s
     .cookie('username', sess.username, { maxAge: 360000 })  // cookies expire after 360s
+    .status(200)
     .sendFile(path.resolve(__dirname, 'index.html'));
 });
 
 // sign-in page
 app.get('/signin', (req, res) => {
-  res.sendFile(path.resolve(VIEWPATH, 'signin.html'));
+  res.status(200).sendFile(path.resolve(VIEWPATH, 'signin.html'));
 });
 
 // sign-up page
@@ -146,7 +152,6 @@ app.get('/audio/:trackname', (req, res) => {
 });
 
 // receive file upload
-const formidable = require('formidable');
 app.post('/upload', (req, res) => {
   // needs a session being maintained (logged in)
   if (!req.session.name) {
@@ -260,6 +265,9 @@ if (process.env.NODE_ENV === 'development') {
 
 // start listening
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('Server listening on: ' + port);
 });
+
+// export the server for testing
+module.exports = server;
