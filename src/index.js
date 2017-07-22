@@ -21,7 +21,6 @@ if (cookies.name !== 'undefined') {
   signupNav.href = '/logout';   // this will directly call logout api to the server
 }
 
-
 const container = document.getElementById('track-container');
 const tracks = new Tracks(container);
 const toolbox = new Toolbox(container, tracks);

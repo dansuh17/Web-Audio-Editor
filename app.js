@@ -10,6 +10,8 @@ const webpack = require('webpack');
 const session = require('express-session');
 const mongoose = require('mongoose');
 
+const User = require('./models/user');
+
 const app = express();
 
 // path for view files
@@ -25,19 +27,6 @@ mongoose.connect('mongodb://localhost:38128/webaudio');
 const db = mongoose.connection;
 db.once('open', () => { console.log('Database connected.'); });
 db.on('error', console.error.bind(console, 'connection error:'));
-const Schema = mongoose.Schema;
-
-// create a schema for the user
-const userSchema = new Schema({
-  username: { type: String, required: true, index: { unique: true }},
-  name: { type: String },
-  password: { type: String, required: true },
-  library: [{
-    audiotitle: String,
-    url: String,
-  }],
-});
-const User = mongoose.model('user', userSchema);  // collection name === 'users'
 
 
 // body parsers & cookie parser
@@ -88,7 +77,7 @@ app.get('/signup', (req, res) => {
 app.post('/post/signin', (req, res) => {
   const username = req.body.username;
 
-  User.findOne({ username: username }, 'username name password', (err, userDoc) => {
+  User.findOneByUsername(username, (err, userDoc) => {
     if (userDoc) {
       if (userDoc.password === req.body.password) {  // check for password
         if (userDoc.name) {
@@ -121,6 +110,7 @@ app.post('/post/signup', (req, res) => {
     password,
     name
   });
+
   user.save((err, userDoc) => {
     if (err) {
       res.status(420).send('User name already exists!');
@@ -191,23 +181,20 @@ app.post('/upload', (req, res) => {
     }
 
     // save the file information in the database
-    const username = fields.username;
-    console.log(username);
-    const filename = files.file.name;
-    const filepath = files.file.path;
-    User.findOneAndUpdate(
-      { username: username },
-      {
-        $push: {
-          library: {  // push into library field
-            audiotitle: filename,
-            url: filepath,
-          }}
-      }, (err, userDoc) => {
-        if (err) {
-          console.error(err);
-        }
-      });
+    const info = {
+      username: fields.username,
+      audioInfo: {
+        audiotitle: files.file.name,
+        url: files.file.path,
+      },
+    };
+
+    // add the uploaded audio's information to the user's library
+    User.addAudioInfoToLibrary(info, (err, userDoc) => {
+      if (err) {
+        console.error(err);
+      }
+    });
   });
 });
 
@@ -220,12 +207,11 @@ app.get('/library/:username', (req, res) => {
   }
 
   // find the user information and its library
-  User.findOne({ username: username }, 'username name library', (err, userDoc) => {
+  User.findOneByUsername(username, (err, userDoc) => {
     if (err) res.status(420).end();
 
     if (userDoc) {
-      const library = userDoc.library;
-      res.json(library);  // send the json data
+      res.json(userDoc.library);  // send the json data
     } else {
       res.status(420).send('No user information found.');
     }
