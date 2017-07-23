@@ -17,6 +17,7 @@ class Tracks {
     this.play = this.play.bind(this);
     this.stop = this.stop.bind(this);
     this.pause = this.pause.bind(this);
+    this.changeVolume = this.changeVolume.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
     this.setModeForTimeline = this.setModeForTimeline.bind(this);
@@ -107,8 +108,8 @@ class Tracks {
               Stop
             </button>
           </div>
-          <input type="range" id="volumeSlider${trackId}"
-                 min="0" max="100" step="1" />
+          <input type="range" id="volumeSlider${trackId}" data-trackid="${trackId}"
+                 value="50" min="0" max="100" step="1" />
           <br />
           <input type="file" id="fileinput${trackId}"
             data-trackid="${trackId}"/>
@@ -158,10 +159,24 @@ class Tracks {
     const uploadFileBtn = document.getElementById(`upload${trackId}`);
     uploadFileBtn.addEventListener('click', this.uploadFile, false);
 
+    const volumeSlider = document.getElementById(`volumeSlider${trackId}`);
+    volumeSlider.addEventListener('change', this.changeVolume, false);
+
     // increase track number
     this.increaseTrackNum();
 
     return trackId;
+  }
+
+  /**
+   * Change the volume of the track.
+   * @param e event node
+   */
+  changeVolume(e) {
+    const id = e.target.dataset.trackid;
+    const volume = e.target.value;
+
+    this.tracks[id].audioSource.setVolume(volume);
   }
 
   /**
@@ -271,8 +286,10 @@ class Tracks {
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
     const newBuffer = this.tracks[id].audioSource.paste(segmentData);
-    this.eraseWave(id);
-    this.renderWave(newBuffer, this.audioCtx, id);
+    if (newBuffer !== null) {
+      this.eraseWave(id);
+      this.renderWave(newBuffer, this.audioCtx, id);
+    }
   }
 
   /**
@@ -374,7 +391,6 @@ class Tracks {
    * @param trackId {number} the track id
    */
   renderWave(audioBuffer, audioCtx, trackId) {
-    console.log(audioBuffer);
     const $track = document.querySelector(`#trackbox${trackId}`);
     const width = $track.getBoundingClientRect().width;
     const timeAxisHeight = 18;
@@ -452,6 +468,7 @@ class Tracks {
       source: null,
       cursorLayer,
     });
+
     this.tracks[trackId]['audioSource'] = audioSourceWrapper;
 
     // add layers to tracks

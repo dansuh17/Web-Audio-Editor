@@ -20,6 +20,19 @@ class AudioSourceWrapper {
     // methods binding to this
     this.pause = this.pause.bind(this);
     this.updateCursor = this.updateCursor.bind(this);
+    this.cut = this.cut.bind(this);
+    this.paste = this.paste.bind(this);
+
+    // create a gain node
+    const gainNode = this.audioCtx.createGain();
+    gainNode.gain.value = 0.5;
+    gainNode.connect(this.destination);
+    this.gainNode = gainNode;
+
+    // this is where the source should be connecting to
+    this.sourceConnectPoint = this.gainNode;
+    // this is where the filters should be connecting to
+    this.filterConnectPoint = this.gainNode;
   }
 
   /**
@@ -34,7 +47,8 @@ class AudioSourceWrapper {
 
     // connect the filter into the pipeline
     this.filter = biquadFilter;
-    biquadFilter.connect(this.audioCtx.destination);
+    biquadFilter.connect(this.filterConnectPoint);
+    this.sourceConnectPoint = this.filter;
   }
 
   /**
@@ -42,7 +56,8 @@ class AudioSourceWrapper {
    */
   disconnectFilter() {
     this.filter.disconnect();
-    this.source.connect(this.audioCtx.destination);
+    this.sourceConnectPoint = this.gainNode;
+    this.source.connect(this.sourceConnectPoint);
     this.filter = null;
   }
 
@@ -66,11 +81,7 @@ class AudioSourceWrapper {
     newSource.buffer = this.buffer;
 
     // connect the source either directly to speaker or the filter
-    if (this.filter !== null) {
-      newSource.connect(this.filter);
-    } else {
-      newSource.connect(this.audioCtx.destination);
-    }
+    newSource.connect(this.sourceConnectPoint);
 
     // start from paused position (which will be 0 if newly created)
     this.source = newSource;
@@ -126,12 +137,13 @@ class AudioSourceWrapper {
     for (let channel = 0; channel < numChannels; channel++) {
       const oldBufferChannelData = buffer.getChannelData(channel);
       const nowBuffer = newBuffer.getChannelData(channel);
+      const cutBufferChannelData = cutBuffer.getChannelData(channel);
 
       for (let i = 0; i < originalFrames; i++) {
         if (i < startFrame) {
           nowBuffer[i] = oldBufferChannelData[i];
         } else if (i >= startFrame && i < endFrame) {
-          cutBuffer[i - startFrame] = oldBufferChannelData[i];  // save the cut-out data
+          cutBufferChannelData[i - startFrame] = oldBufferChannelData[i];  // save the cut-out data
         } else {
           nowBuffer[i - durationInFrames] = oldBufferChannelData[i];
         }
@@ -151,14 +163,16 @@ class AudioSourceWrapper {
    */
   paste(data) {
     this.stop();  // stop before modifying the source node
+    console.log(this.cutBuffer);
 
     if (this.cutBuffer === null) {
-      return;  // if nothing is cut and stored before, do nothing.
+      console.log('Here?');
+      return null;  // if nothing is cut and stored before, do nothing.
     }
 
     const start = data.start;
     const buffer = this.buffer;
-    const originalFrames = this.buffer.length;
+    const originalFrames = buffer.length;
     const numChannels = this.buffer.numberOfChannels;
     const sampleRate = this.audioCtx.sampleRate;
     const cutBufferFrames = this.cutBuffer.length;
@@ -188,6 +202,14 @@ class AudioSourceWrapper {
     // allocate the new buffer
     this.buffer = newBuffer;
     return newBuffer;
+  }
+
+  /**
+   * Sets the volume of the gain node.
+   * @param volume {Number} the desired volume [0, 100]
+   */
+  setVolume(volume) {
+    this.gainNode.gain.value = volume / 100;
   }
 
   /**
@@ -248,11 +270,8 @@ class AudioSourceWrapper {
    */
   pause() {
     let elapsed = this.audioCtx.currentTime - this.startedAt;
-
     const buffer = this.buffer;
     const numFrames = buffer.length;
-    console.log(numFrames);
-    console.log(elapsed);
 
     if ((numFrames / this.audioCtx.sampleRate) < elapsed) {
       elapsed = 0;
