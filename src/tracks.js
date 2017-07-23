@@ -19,6 +19,7 @@ class Tracks {
     this.pause = this.pause.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
+    this.setModeForTimeline = this.setModeForTimeline.bind(this);
 
     this.trackIndex = 0;
     this.container = container;
@@ -39,17 +40,26 @@ class Tracks {
    * Toggle between zoom and selection modes.
    */
   toggleMode() {
-    this.mode = this.mode === 'zoom' ? 'selection' : 'zoom';
+    this.mode = (this.mode === 'zoom') ? 'selection' : 'zoom';
 
     for (let trackId of Object.keys(this.tracks)) {
       const timeline = this.tracks[trackId].timeline;
-      if (this.mode === 'zoom') {
-        timeline.state = new wavesUI.states.CenteredZoomState(timeline);
-      } else if (this.mode === 'selection') {
-        timeline.state = new wavesUI.states.SimpleEditionState(timeline);
-      } else {
-        throw 'Invalid Mode for Tracks';
-      }
+      this.setModeForTimeline(timeline, this.mode);
+    }
+  }
+
+  /**
+   * Given the timeline instance, set the view state according to the mode.
+   * @param timeline {Timeline} the track's timeline
+   * @param mode {String} the mode string
+   */
+  setModeForTimeline(timeline, mode) {
+    if (mode === 'zoom') {
+      timeline.state = new wavesUI.states.CenteredZoomState(timeline);
+    } else if (mode === 'selection') {
+      timeline.state = new wavesUI.states.SimpleEditionState(timeline);
+    } else {
+      throw 'Invalid Mode for Tracks';
     }
   }
 
@@ -442,7 +452,9 @@ class Tracks {
     timeline.tracks.update();
 
     this.tracks[trackId]['timeline'] = timeline;
-    timeline.state = new wavesUI.states.CenteredZoomState(timeline);  // initial state set to zoom
+
+    // set the timeline view mode - either 'selection', or 'zoom'
+    this.setModeForTimeline(timeline, this.mode);
   }
 
   /**

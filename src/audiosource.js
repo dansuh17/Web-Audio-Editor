@@ -15,6 +15,7 @@ class AudioSourceWrapper {
     this.isPlaying = false;
     this.destination = this.audioCtx.destination;
     this.filter = null;
+    this.cutBuffer = null;
 
     // methods binding to this
     this.pause = this.pause.bind(this);
@@ -100,6 +101,9 @@ class AudioSourceWrapper {
    * @returns {AudioBuffer} the new audio buffer
    */
   cut(data) {
+    // stop before modifying waveforms
+    this.stop();
+
     // cut out the selected data!
     const start = data.start;  // in seconds!
     const duration = data.duration;
@@ -112,27 +116,31 @@ class AudioSourceWrapper {
     const sampleRate = this.audioCtx.sampleRate;
     const startFrame = Math.floor(start * sampleRate);
     const durationInFrames = Math.floor(duration * sampleRate);
+    const endFrame = startFrame + durationInFrames;
     const afterFrameCount = Math.floor(originalFrames - durationInFrames);
 
     const newBuffer = this.audioCtx.createBuffer(numChannels, afterFrameCount, sampleRate);
+    const cutBuffer = this.audioCtx.createBuffer(numChannels, durationInFrames, sampleRate);
 
     // copy contents into the new buffer
     for (let channel = 0; channel < numChannels; channel++) {
       const oldBufferChannelData = buffer.getChannelData(channel);
       const nowBuffer = newBuffer.getChannelData(channel);
 
-      for (let i = 0; i < afterFrameCount; i++) {
+      for (let i = 0; i < originalFrames; i++) {
         if (i < startFrame) {
           nowBuffer[i] = oldBufferChannelData[i];
+        } else if (i >= startFrame && i < endFrame) {
+          cutBuffer[i - startFrame] = oldBufferChannelData[i];  // save the cut-out data
         } else {
-          nowBuffer[i] = oldBufferChannelData[i + durationInFrames];
+          nowBuffer[i - durationInFrames] = oldBufferChannelData[i];
         }
       }
     }
 
     // allocate new buffer
-    this.disconnectSource();
     this.buffer = newBuffer;
+    this.cutBuffer = cutBuffer;
     return newBuffer;
   }
 
@@ -142,6 +150,8 @@ class AudioSourceWrapper {
    * @returns {AudioBuffer} the new audio buffer created
    */
   leave(data) {
+    this.stop();  // stop before modifying the source node
+
     // cut out the selected data!
     const start = data.start;  // in seconds!
     const duration = data.duration;
@@ -176,8 +186,9 @@ class AudioSourceWrapper {
    * Stop the source from playing and retreat the cursor to 0.
    */
   stop() {
+    this.disconnectSource();
+
     if (this.source) {
-      this.source.disconnect();
       this.source.stop();
       this.source = null;
     }

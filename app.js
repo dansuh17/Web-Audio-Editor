@@ -23,6 +23,7 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));
 }
 
+/*** DATABASE SETUP ***/
 // determine host depending on environment
 let DB_HOST = 'localhost';
 let MONGOPORT = 38128;
@@ -36,13 +37,13 @@ if (process.env.NODE_ENV === 'test') {
   MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio-test`;
 }
 
-// database setup
+// connect to database
 mongoose.connect(MONGO_URI);
 const db = mongoose.connection;
 db.once('open', () => { console.log('Database connected.'); });
 db.on('error', console.error.bind(console, 'connection error:'));
 
-// body parsers & cookie parser
+// body parsers & cookie parser middlewares
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
