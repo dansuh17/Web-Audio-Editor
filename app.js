@@ -23,9 +23,20 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));
 }
 
-let MONGO_URI = 'mongodb://localhost:38128/webaudio';
+// determine host depending on environment
+let DB_HOST = 'localhost';
+if (process.env.NODE_ENV === 'production') {
+  DB_HOST = 'mongo';
+}
+
+let MONGOPORT = 38128;
+if (process.env.NODE_ENV === 'production') {
+  MONGOPORT = 27017;
+}
+
+let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio`;
 if (process.env.NODE_ENV === 'test') {
-  MONGO_URI = 'mongodb://localhost:38128/webaudio-test';
+  MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio-test`;
 }
 
 // database setup

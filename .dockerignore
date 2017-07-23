@@ -1,0 +1,7 @@
+Dockerfile
+/node_modules/*
+/dist/*
+.DS_Store
+.gitignore
+README.md
+
