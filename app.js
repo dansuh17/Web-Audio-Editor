@@ -27,15 +27,18 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
 // determine host depending on environment
 let DB_HOST = 'localhost';
 let MONGOPORT = 38128;
+let MONGO_COLLECTION = 'webaudio';
+
 if (process.env.NODE_ENV === 'production') {
   DB_HOST = 'mongo';
   MONGOPORT = 27017;
 }
 
-let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio`;
 if (process.env.NODE_ENV === 'test') {
-  MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio-test`;
+  MONGO_COLLECTION = 'webuaudio-test';
 }
+
+let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/${MONGO_COLLECTION}`;
 
 // connect to database
 mongoose.connect(MONGO_URI);

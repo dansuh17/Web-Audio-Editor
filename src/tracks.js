@@ -251,12 +251,26 @@ class Tracks {
     this.renderWave(newAudioBuffer, this.audioCtx, id);  // draw the track waveform again
   }
 
+  /**
+   * Leaves the selection and cut out everything else.
+   */
   leaveSelection() {
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
     const newAudioBuffer = this.tracks[id].audioSource.leave(segmentData);
     this.eraseWave(id);
     this.renderWave(newAudioBuffer, this.audioCtx, id);
+  }
+
+  /**
+   * Paste the cutout buffer to the current selection.
+   */
+  paste() {
+    const id = this.currentTrackId;
+    const segmentData = this.getSegmentData(id);
+    const newBuffer = this.tracks[id].audioSource.paste(segmentData);
+    this.eraseWave(id);
+    this.renderWave(newBuffer, this.audioCtx, id);
   }
 
   /**

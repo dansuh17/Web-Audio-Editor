@@ -145,6 +145,52 @@ class AudioSourceWrapper {
   }
 
   /**
+   * Paste the cutout buffer on current position (start of selection segment).
+   * @param data selected segment data
+   * @returns {AudioBuffer} the new audio buffer result
+   */
+  paste(data) {
+    this.stop();  // stop before modifying the source node
+
+    if (this.cutBuffer === null) {
+      return;  // if nothing is cut and stored before, do nothing.
+    }
+
+    const start = data.start;
+    const buffer = this.buffer;
+    const originalFrames = this.buffer.length;
+    const numChannels = this.buffer.numberOfChannels;
+    const sampleRate = this.audioCtx.sampleRate;
+    const cutBufferFrames = this.cutBuffer.length;
+
+    const startFrame = Math.floor(start * sampleRate);
+    const pasteEndFrame = Math.floor(startFrame + cutBufferFrames);
+    const afterFrames = originalFrames + cutBufferFrames;
+
+    const newBuffer = this.audioCtx.createBuffer(numChannels, afterFrames, sampleRate);
+
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const nowBuffer = newBuffer.getChannelData(channel);
+      const cutBufferChannelData = this.cutBuffer.getChannelData(channel);
+
+      for (let i = 0; i < afterFrames; i++) {
+        if (i < startFrame) {
+          nowBuffer[i] = oldBufferChannelData[i];
+        } else if (i >= startFrame && i < pasteEndFrame) {
+          nowBuffer[i] = cutBufferChannelData(i - startFrame);  // this is the part where we paste
+        } else {
+          nowBuffer[i] = oldBufferChannelData[i - cutBufferFrames];
+        }
+      }
+    }
+
+    // allocate the new buffer
+    this.buffer = newBuffer;
+    return newBuffer;
+  }
+
+  /**
    * Leave the selection and discard everywhere else.
    * @param data selected segment data
    * @returns {AudioBuffer} the new audio buffer created
@@ -178,7 +224,6 @@ class AudioSourceWrapper {
 
     // allocate new buffer
     this.buffer = newBuffer;
-    this.disconnectSource();
     return newBuffer;
   }
 
