@@ -15,7 +15,6 @@ class AudioSourceWrapper {
     this.isPlaying = false;
     this.destination = this.audioCtx.destination;
     this.filter = null;
-    this.cutBuffer = null;
 
     // methods binding to this
     this.pause = this.pause.bind(this);
@@ -109,7 +108,7 @@ class AudioSourceWrapper {
   /**
    * Cut out portion of the buffer specified by 'data.'
    * @param data contains information about the segment
-   * @returns {AudioBuffer} the new audio buffer
+   * @returns {{newBuffer: *, cutBuffer: *}} the new audio buffer
    */
   cut(data) {
     // stop before modifying waveforms
@@ -152,8 +151,10 @@ class AudioSourceWrapper {
 
     // allocate new buffer
     this.buffer = newBuffer;
-    this.cutBuffer = cutBuffer;
-    return newBuffer;
+    return {
+      newBuffer,
+      cutBuffer,
+    };
   }
 
   /**
@@ -161,12 +162,11 @@ class AudioSourceWrapper {
    * @param data selected segment data
    * @returns {AudioBuffer} the new audio buffer result
    */
-  paste(data) {
+  paste(data, cutBuffer) {
     this.stop();  // stop before modifying the source node
-    console.log(this.cutBuffer);
+    console.log(cutBuffer);
 
-    if (this.cutBuffer === null) {
-      console.log('Here?');
+    if (cutBuffer === null) {
       return null;  // if nothing is cut and stored before, do nothing.
     }
 
@@ -175,7 +175,7 @@ class AudioSourceWrapper {
     const originalFrames = buffer.length;
     const numChannels = this.buffer.numberOfChannels;
     const sampleRate = this.audioCtx.sampleRate;
-    const cutBufferFrames = this.cutBuffer.length;
+    const cutBufferFrames = cutBuffer.length;
 
     const startFrame = Math.floor(start * sampleRate);
     const pasteEndFrame = Math.floor(startFrame + cutBufferFrames);
@@ -186,13 +186,13 @@ class AudioSourceWrapper {
     for (let channel = 0; channel < numChannels; channel++) {
       const oldBufferChannelData = buffer.getChannelData(channel);
       const nowBuffer = newBuffer.getChannelData(channel);
-      const cutBufferChannelData = this.cutBuffer.getChannelData(channel);
+      const cutBufferChannelData = cutBuffer.getChannelData(channel);
 
       for (let i = 0; i < afterFrames; i++) {
         if (i < startFrame) {
           nowBuffer[i] = oldBufferChannelData[i];
         } else if (i >= startFrame && i < pasteEndFrame) {
-          nowBuffer[i] = cutBufferChannelData(i - startFrame);  // this is the part where we paste
+          nowBuffer[i] = cutBufferChannelData[i - startFrame];  // this is the part where we paste
         } else {
           nowBuffer[i] = oldBufferChannelData[i - cutBufferFrames];
         }

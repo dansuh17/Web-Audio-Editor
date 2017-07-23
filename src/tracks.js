@@ -27,6 +27,7 @@ class Tracks {
     this.tracks = {};
     this.mode = 'zoom';
     this.currentTrackId = 0;
+    this.cutBuffer = null;
 
     try {
       // create audio context - later will desireably become global singleton
@@ -263,9 +264,11 @@ class Tracks {
   cutSelection() {
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
-    const newAudioBuffer = this.tracks[id].audioSource.cut(segmentData);
+    const result = this.tracks[id].audioSource.cut(segmentData);
+    this.cutBuffer = result.cutBuffer;
+
     this.eraseWave(id);
-    this.renderWave(newAudioBuffer, this.audioCtx, id);  // draw the track waveform again
+    this.renderWave(result.newBuffer, this.audioCtx, id);  // draw the track waveform again
   }
 
   /**
@@ -283,9 +286,14 @@ class Tracks {
    * Paste the cutout buffer to the current selection.
    */
   paste() {
+    if (!this.cutBuffer) {
+      return;
+    }
+
     const id = this.currentTrackId;
     const segmentData = this.getSegmentData(id);
-    const newBuffer = this.tracks[id].audioSource.paste(segmentData);
+    const newBuffer = this.tracks[id].audioSource.paste(segmentData, this.cutBuffer);
+
     if (newBuffer !== null) {
       this.eraseWave(id);
       this.renderWave(newBuffer, this.audioCtx, id);
