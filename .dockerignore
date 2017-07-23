@@ -1,7 +1,11 @@
 Dockerfile
-/node_modules/*
-/dist/*
+node_modules
+dist
+docs
+.idea
+uploads
 .DS_Store
 .gitignore
 README.md
 jenkins-test-results.xml
+*.iml

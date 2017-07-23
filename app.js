@@ -25,9 +25,10 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
 
 // determine host depending on environment
 let DB_HOST = 'localhost';
-let MONGOPORT = 27017;
+let MONGOPORT = 38128;
 if (process.env.NODE_ENV === 'production') {
   DB_HOST = 'mongo';
+  MONGOPORT = 27017;
 }
 
 let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/webaudio`;
