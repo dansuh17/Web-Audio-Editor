@@ -106,3 +106,4 @@ dist
 *.iml
 *bundle.js
 uploads/
+jenkins-test-results.xml

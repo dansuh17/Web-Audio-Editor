@@ -8,7 +8,8 @@
     "build": "npm run clean && webpack --color",
     "dev": "NODE_ENV=development node app.js",
     "start": "NODE_ENV=production node app.js",
-    "test": "mocha --timeout 10000"
+    "test": "mocha --timeout 10000",
+    "test-jenkins": "MOCHA_FILE=./jenkins-test-results.xml mocha test/** --reporter mocha-junit-reporter"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "chai": "^4.1.0",
     "chai-http": "^3.0.0",
     "mocha": "^3.4.2",
+    "mocha-junit-reporter": "^1.13.0",
     "really-need": "^1.9.2",
     "sinon": "^2.3.8",
     "sinon-mongoose": "^2.0.2",

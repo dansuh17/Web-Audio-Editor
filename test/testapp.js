@@ -14,7 +14,6 @@ const server = require('../app');
 
 require('sinon-mongoose');
 chai.use(chaiHttp);
-chai.use(chaiDom);
 
 
 describe('Array', function() {
