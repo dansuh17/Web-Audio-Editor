@@ -107,6 +107,8 @@ class Tracks {
               Stop
             </button>
           </div>
+          <input type="range" id="volumeSlider${trackId}"
+                 min="0" max="100" step="1" />
           <br />
           <input type="file" id="fileinput${trackId}"
             data-trackid="${trackId}"/>
