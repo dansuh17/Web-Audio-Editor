@@ -10,8 +10,9 @@ const chaiHttp = require('chai-http');
 const should = require('chai').should();
 const sinon = require('sinon');
 const supertest = require('supertest');
-
 const expect = chai.expect;
+
+// required modules
 const User = require('../models/user');
 const server = require('../app');
 
@@ -79,14 +80,17 @@ describe('Controller Tests', function() {
   before(() => {
     // bring up controller
     controller = require('../controllers/appController');
+
     session = {  // fake session
       name: 'dansuh',
       username: 'dansuh@gmail.com',
     };
+
     res = {
       cookie: (one, two, three) => res,
       status: (statusNum) => res,
       sendFile: (path) => res,
+      send: (string) => res,
     };
   });
 
@@ -149,6 +153,35 @@ describe('Controller Tests', function() {
 
     status.restore();
     assert(status.calledWith(200));
+    done();
+  });
+
+  it('postSignIn should return 420 with Incorrect Password for wrong password', (done) => {
+    // prepare a stub and a spy
+    const send = sinon.spy(res, 'send');
+    const findOneByUsernameStub = sinon.stub(User, 'findOneByUsername');
+    findOneByUsernameStub.callsFake((username, callback) => {
+      callback(null, { name: 'dansuh', password: 'wrong password' });
+    });
+
+    // make up a request
+    const req = {
+      session,
+      body: {
+        username: 'dansuh@gmail.com',
+        password: 'right password',
+      },
+    };
+
+    // call!
+    controller.postSignIn(req, res);
+
+    findOneByUsernameStub.restore();
+    send.restore();
+
+    // asserts
+    sinon.assert.calledOnce(send);
+    assert(send.calledWith('Incorrect password.'));
     done();
   });
 });

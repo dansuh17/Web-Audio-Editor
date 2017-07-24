@@ -28,8 +28,9 @@ function signUp(req, res) {
 // signup authentication
 function postSignIn(req, res) {
   const username = req.body.username;
+  User.findOneByUsername(username, checkCredentials);
 
-  User.findOneByUsername(username, (err, userDoc) => {
+  function checkCredentials(error, userDoc) {
     if (userDoc) {
       if (userDoc.password === req.body.password) {  // check for password
         if (userDoc.name) {
@@ -47,8 +48,9 @@ function postSignIn(req, res) {
     } else {
       res.status(420).send('Username does not exist.');
     }
-  });
+  }
 }
+
 
 // signup database save
 function postSignUp(req, res) {
