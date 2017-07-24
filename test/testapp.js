@@ -1,10 +1,14 @@
 process.env.NODE_ENV = 'test';
 
+const fs = require('fs');
+const path = require('path');
+
 /* eslint-disable global-require */
 const assert = require('assert');
 const it = require('mocha').it;
 const describe = require('mocha').describe;
 const before = require('mocha').before;
+const beforeEach = require('mocha').beforeEach;
 const chai = require('chai');
 const should = require('chai').should(); // eslint-disable-line no-unused-vars
 const chaiHttp = require('chai-http');
@@ -77,6 +81,7 @@ describe('Controller Tests', () => {
     session = { // fake session
       name: 'dansuh',
       username: 'dansuh@gmail.com',
+      destroy: cb => cb(),
     };
 
     res = {
@@ -84,6 +89,9 @@ describe('Controller Tests', () => {
       status: () => res,
       sendFile: () => res,
       send: () => res,
+      redirect: () => res,
+      json: () => res,
+      end: () => res,
     };
   });
 
@@ -176,6 +184,186 @@ describe('Controller Tests', () => {
     sinon.assert.calledOnce(send);
     assert(send.calledWith('Incorrect password.'));
     done();
+  });
+
+  it('redirects to "/" on /logout', (done) => {
+    const redirect = sinon.spy(res, 'redirect');
+
+    controller.logOut({ session }, res);
+    redirect.restore();
+
+    sinon.assert.calledOnce(redirect);
+    done();
+  });
+
+  it('destroys the session on logout', (done) => {
+    const destroy = sinon.spy(session, 'destroy');
+
+    controller.logOut({ session }, res);
+
+    destroy.restore();
+    sinon.assert.callCount(destroy, 1);
+    done();
+  });
+
+  it('does not call destroy upon logout when session is not continued', (done) => {
+    const sess = {
+      destroy: cb => cb(),
+      // no username!
+    };
+
+    const destroy = sinon.spy(sess, 'destroy');
+
+    controller.logOut({ session: sess }, res);
+    destroy.restore();
+
+    sinon.assert.callCount(destroy, 0);
+    done();
+  });
+
+  describe('audioReqByTrackName', () => {
+    let getOriginalData;
+    let deleteTempFile;
+    let TEMP_FILE_NAME;
+
+    beforeEach(() => {
+      TEMP_FILE_NAME = 'test_temp_file';
+
+      getOriginalData = filename => fs.readFileSync(
+        path.resolve(__dirname, `../public/sample_tracks/${filename}.mp3`));
+
+      deleteTempFile = (filename, done) => {
+        fs.stat(filename, () => {
+          fs.unlink(filename, (err) => {
+            assert(!err);
+            done();
+          });
+        });
+      };
+    });
+
+    it('sends the file according to the track name requested: exhale', (done) => {
+      const audioFilename = 'exhale';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
+
+    it('sends the file according to the track name requested: itsgonnarain', (done) => {
+      const audioFilename = 'itsgonnarain';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
+
+    it('sends the file according to the track name requested: starcraft', (done) => {
+      const audioFilename = 'starcraft';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
+  });
+
+  describe('upload', () => {
+    it('fails with no session', (done) => {
+      const status = sinon.spy(res, 'status');
+      const send = sinon.spy(res, 'send');
+
+      controller.upload({ session: {} }, res);
+
+      status.restore();
+      send.restore();
+      assert(status.calledWith(420));
+      assert(send.calledWith('Session information unavailable!'));
+      done();
+    });
+  });
+
+  describe('libraryInfo', () => {
+    it('returns Not Available with no username provided', (done) => {
+      const status = sinon.spy(res, 'status');
+
+      controller.libraryInfo({ params: { username: 'undefined' } }, res);
+      status.restore();
+      assert(status.calledWith(420));
+      done();
+    });
+
+    it('returns the library contents', (done) => {
+      const json = sinon.spy(res, 'json');
+      const req = {
+        params: {
+          username: 'valid',
+        },
+      };
+
+      const tempUserDoc = {
+        name: 'dansuh',
+        username: 'valid',
+        password: 'password',
+        library: [{ audiotitle: 'foo', url: 'path/to/foo' }],
+      };
+
+      const findOneByUsernameStub = sinon.stub(User, 'findOneByUsername');
+      findOneByUsernameStub.callsFake((username, callback) => {
+        callback('Not Error', tempUserDoc);
+      });
+
+      controller.libraryInfo(req, res);
+
+      findOneByUsernameStub.restore();
+
+      sinon.assert.calledOnce(json);
+      sinon.assert.calledWith(json, sinon.match.array);
+      sinon.assert.calledWithMatch(json, tempUserDoc.library);
+
+      done();
+    });
   });
 });
 

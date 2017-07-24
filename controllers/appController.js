@@ -1,4 +1,6 @@
 const path = require('path');
+const fs = require('fs');
+const formidable = require('formidable');
 
 const User = require('../models/user');
 
@@ -87,6 +89,110 @@ function logOut(req, res) {
   res.redirect('/');
 }
 
+// request audio file by track name
+function audioReqByTrackName(req, res) {
+  const trackName = req.params.trackname;
+  const starcraftTrack = path.resolve(__dirname, `../public/sample_tracks/${trackName}.mp3`);
+  const readStream = fs.createReadStream(starcraftTrack);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    res.end();
+    console.log(`Reading file completed : ${starcraftTrack}`);
+  });
+}
+
+// upload a user-uploaded file
+function upload(req, res) {
+  // needs a session being maintained (logged in)
+  if (!req.session.name) {
+    res.status(420).send('Session information unavailable!');
+    return;
+  }
+
+  const form = new formidable.IncomingForm();
+  form.uploadDir = path.resolve(__dirname, '../uploads');
+  form.type = true; // keep the extension for the file being saved
+
+  form.addListener('end', () => {
+    console.log(`File upload completed: ${req.session.id}`);
+    res.end();
+  });
+
+  // done reading file
+  form.addListener('file', () => {
+    res.status(200);
+  });
+
+  // set error
+  form.addListener('error', (err) => {
+    console.error(err);
+    res.status(420);
+  });
+
+  // parse information about the file that has been received
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    // save the file information in the database
+    const info = {
+      username: fields.username,
+      audioInfo: {
+        audiotitle: files.file.name,
+        url: files.file.path,
+      },
+    };
+
+    // add the uploaded audio's information to the user's library
+    User.addAudioInfoToLibrary(info, (error) => {
+      if (error) {
+        console.error(error);
+      }
+    });
+  });
+}
+
+// retrieve library information
+function libraryInfo(req, res) {
+  const username = req.params.username;
+  if (username === 'undefined') {
+    res.status(420).send('Must be logged in!');
+    return;
+  }
+
+  // find the user information and its library
+  User.findOneByUsername(username, (err, userDoc) => {
+    if (err) res.status(420).end();
+
+    if (userDoc) {
+      res.json(userDoc.library); // send the json data
+    } else {
+      res.status(420).send('No user information found.');
+    }
+  });
+}
+
+// the user retrieves the audio file to the client
+// the user can later download it or create a track with it
+function getAudioByUrl(req, res) {
+  const username = req.params.username;
+  const url = req.params.url;
+  if (username === 'null') {
+    res.status(420).send('The user is not logged in! (how does this happen?)');
+    return;
+  }
+
+  const readStream = fs.createReadStream(url);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    console.log(`Sending library file completed : ${url}`);
+  });
+}
+
 // 404
 function notFound(req, res, next) {
   const err = new Error('Not Found');
@@ -103,4 +209,8 @@ module.exports = {
   postSignUp,
   logOut,
   notFound,
+  audioReqByTrackName,
+  upload,
+  libraryInfo,
+  getAudioByUrl,
 };
