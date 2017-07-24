@@ -16,9 +16,6 @@ const controller = require('./controllers/appController');
 
 const app = express();
 
-// path for view files
-const VIEWPATH = path.resolve(__dirname, './views/');
-
 // create the uploads folder to save user-uploaded audio
 if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));

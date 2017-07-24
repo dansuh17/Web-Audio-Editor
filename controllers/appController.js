@@ -10,7 +10,7 @@ function getRoot(req, res, next) {
   const sess = req.session;
   res
     .cookie('name', sess.name, { maxAge: 360000 })
-    .cookie('username', sess.usernmae, { maxAge: 360000 })
+    .cookie('username', sess.username, { maxAge: 360000 })
     .status(200)
     .sendFile(path.resolve(ROOTPATH, 'index.html'));
 }
@@ -50,7 +50,6 @@ function postSignIn(req, res) {
     }
   }
 }
-
 
 // signup database save
 function postSignUp(req, res) {

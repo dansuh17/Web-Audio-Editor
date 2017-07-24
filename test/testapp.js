@@ -20,15 +20,6 @@ require('sinon-mongoose');
 chai.use(chaiHttp);
 
 
-describe('Array', function() {
-  describe('#indexOf()', function() {
-    it('should return -1 when the value is not present', function() {
-      assert.equal(-1, [1,2,3].indexOf(4));
-    });
-  });
-});
-
-
 describe('Mongoose User Schema Test', function() {
   const UserMock = sinon.mock(User);
 

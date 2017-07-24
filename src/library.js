@@ -1,6 +1,10 @@
 import cookieParser from 'cookie';
 
 
+/**
+ * User-defined library.
+ * The user can store their own audio files up on the server.
+ */
 class Library {
   constructor(tracks) {
     // function binding
@@ -26,6 +30,7 @@ class Library {
       this.username = null;
       this.libraryNavBtn.classList.add('disabled');
     } else {
+      console.log(cookies);
       this.username = cookies.username;
       this.libraryNavBtn.classList.remove('disabled');
     }
