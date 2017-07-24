@@ -137,7 +137,7 @@ class AudioSourceWrapper {
 
       for (let i = 0; i < originalFrames; i++) {
         if (i < fadeEndFrame) {
-          nowBuffer[i] = oldBufferChannelData[i] * (i / fadeEndFrame);  // linear fade in
+          nowBuffer[i] = oldBufferChannelData[i] * (i / fadeEndFrame); // linear fade in
         } else {
           nowBuffer[i] = oldBufferChannelData[i];
         }
@@ -171,7 +171,8 @@ class AudioSourceWrapper {
       for (let i = 0; i < originalFrames; i++) {
         if (i >= fadeStartFrame) {
           const elapsedAfterFade = i - fadeStartFrame;
-          nowBuffer[i] = oldBufferChannelData[i] * ((fadeDurationFrame - elapsedAfterFade) / fadeDurationFrame);  // linear fade in
+          nowBuffer[i] = oldBufferChannelData[i]
+            * ((fadeDurationFrame - elapsedAfterFade) / fadeDurationFrame); // linear fade in
         } else {
           nowBuffer[i] = oldBufferChannelData[i];
         }
@@ -192,7 +193,7 @@ class AudioSourceWrapper {
     this.stop();
 
     // cut out the selected data!
-    const start = data.start;  // in seconds!
+    const start = data.start; // in seconds!
     const duration = data.duration;
 
     const buffer = this.buffer;
@@ -219,7 +220,7 @@ class AudioSourceWrapper {
         if (i < startFrame) {
           nowBuffer[i] = oldBufferChannelData[i];
         } else if (i >= startFrame && i < endFrame) {
-          cutBufferChannelData[i - startFrame] = oldBufferChannelData[i];  // save the cut-out data
+          cutBufferChannelData[i - startFrame] = oldBufferChannelData[i]; // save the cut-out data
         } else {
           nowBuffer[i - durationInFrames] = oldBufferChannelData[i];
         }
@@ -240,11 +241,11 @@ class AudioSourceWrapper {
    * @returns {AudioBuffer} the new audio buffer result
    */
   paste(data, cutBuffer) {
-    this.stop();  // stop before modifying the source node
+    this.stop(); // stop before modifying the source node
     console.log(cutBuffer);
 
     if (cutBuffer === null) {
-      return null;  // if nothing is cut and stored before, do nothing.
+      return null; // if nothing is cut and stored before, do nothing.
     }
 
     const start = data.start;
@@ -269,7 +270,7 @@ class AudioSourceWrapper {
         if (i < startFrame) {
           nowBuffer[i] = oldBufferChannelData[i];
         } else if (i >= startFrame && i < pasteEndFrame) {
-          nowBuffer[i] = cutBufferChannelData[i - startFrame];  // this is the part where we paste
+          nowBuffer[i] = cutBufferChannelData[i - startFrame]; // this is the part where we paste
         } else {
           nowBuffer[i] = oldBufferChannelData[i - cutBufferFrames];
         }
@@ -295,10 +296,10 @@ class AudioSourceWrapper {
    * @returns {AudioBuffer} the new audio buffer created
    */
   leave(data) {
-    this.stop();  // stop before modifying the source node
+    this.stop(); // stop before modifying the source node
 
     // cut out the selected data!
-    const start = data.start;  // in seconds!
+    const start = data.start; // in seconds!
     const duration = data.duration;
 
     const buffer = this.buffer;

@@ -44,6 +44,20 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        exclude: /(node_modules|dist)/,
+        include: /(src|controllers|models|test)/,
+        enforce:'pre',  // pre-load the linter
+        loader: 'eslint-loader',
+        options: {
+          cache: true,
+          // failOnError: true,
+          outputReport: {
+            filePath: 'checkstyle.xml',
+          },
+        },
+      },
+      {
+        test: /\.js$/,
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
