@@ -12,7 +12,7 @@ class Library {
     this.getLibraryInfo = this.getLibraryInfo.bind(this);
     this.onShown = this.onShown.bind(this);
 
-    this.tracks = tracks;  // Tracks instance
+    this.tracks = tracks; // Tracks instance
     this.username = null;
     this.libraryList = null;
 
@@ -45,10 +45,8 @@ class Library {
     }
 
     // obtain library information from the database
-    fetch(`/library/${this.username}`).then((res) => {
-      return res.json();
-    }).then((jsonData) => {
-      this.libraryList = jsonData;  // set it a variable
+    fetch(`/library/${this.username}`).then(res => res.json()).then((jsonData) => {
+      this.libraryList = jsonData; // set it a variable
     }).catch((err) => {
       alert(err);
     });
@@ -56,12 +54,11 @@ class Library {
 
   /**
    * Attach the library information in the modal.
-   * @param e event node
    */
-  onShown(e) {
-    console.log(e);
+  onShown() {
     const listgroup = document.getElementById('library-modal-listgroup');
-    for (let audioObj of this.libraryList) {
+
+    this.libraryList.forEach((audioObj) => {
       const listElemString = `
         <button type="button" class="list-group-item list-group-item-action"
                 data-url="${audioObj.url}" id="librarylist${audioObj.audiotitle}">
@@ -72,20 +69,18 @@ class Library {
       listgroup.insertAdjacentHTML('beforeend', listElemString);
 
       // attach an event listener
-      listgroup.lastChild.addEventListener('click', (e) => {
-        const url = e.target.dataset.url;
+      listgroup.lastChild.addEventListener('click', (event) => {
+        const url = event.target.dataset.url;
         const uriUrl = encodeURIComponent(url);
 
-        fetch(`/useraudio/${this.username}/${uriUrl}`).then((res) => {
-          return res.arrayBuffer();
-        }).then((arraybuffer) => {
+        fetch(`/useraudio/${this.username}/${uriUrl}`).then(res => res.arrayBuffer()).then((arraybuffer) => {
           this.tracks.createTrackForBuffer(arraybuffer);
         }).catch((err) => {
-          console.error('Failed to load : ' + audioObj.audiotitle);
+          console.error(`Failed to load : ${audioObj.audiotitle}`);
           console.error(err);
         });
       }, false);
-    }
+    });
   }
 
   /**

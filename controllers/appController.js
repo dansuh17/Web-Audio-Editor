@@ -6,7 +6,7 @@ const ROOTPATH = path.resolve(__dirname, '../');
 const VIEWPATH = path.resolve(ROOTPATH, './views');
 
 // GET call on root '/'
-function getRoot(req, res, next) {
+function getRoot(req, res) {
   const sess = req.session;
   res
     .cookie('name', sess.name, { maxAge: 360000 })
@@ -27,12 +27,9 @@ function signUp(req, res) {
 
 // signup authentication
 function postSignIn(req, res) {
-  const username = req.body.username;
-  User.findOneByUsername(username, checkCredentials);
-
   function checkCredentials(error, userDoc) {
     if (userDoc) {
-      if (userDoc.password === req.body.password) {  // check for password
+      if (userDoc.password === req.body.password) { // check for password
         if (userDoc.name) {
           // make sure 'credentials: include' for fetch api!
           req.session.name = userDoc.name;
@@ -41,6 +38,7 @@ function postSignIn(req, res) {
         }
         req.session.username = userDoc.username;
         req.session.save();
+        const username = userDoc.username;
         res.status(200).send({ username });
       } else {
         res.status(420).send('Incorrect password.');
@@ -49,6 +47,9 @@ function postSignIn(req, res) {
       res.status(420).send('Username does not exist.');
     }
   }
+
+  const username = req.body.username;
+  User.findOneByUsername(username, checkCredentials);
 }
 
 // signup database save
@@ -61,14 +62,14 @@ function postSignUp(req, res) {
   const user = new User({
     username,
     password,
-    name
+    name,
   });
 
   user.save((err, userDoc) => {
     if (err) {
       res.status(420).send('User name already exists!');
     } else {
-      res.sendStatus(200);
+      res.status(200).send(userDoc.username);
     }
   });
 }
@@ -78,7 +79,7 @@ function logOut(req, res) {
   const sess = req.session;
   // if there is a user logged in, destroy the session
   if (sess.username) {
-    sess.destroy(err => {
+    sess.destroy((err) => {
       if (err) console.error(err);
     });
   }

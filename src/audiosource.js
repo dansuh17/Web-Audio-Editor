@@ -368,9 +368,8 @@ class AudioSourceWrapper {
       return this.pausedAt;
     } else if (this.startedAt !== 0 || this.isPlaying) {
       return this.audioCtx.currentTime - this.startedAt;
-    } else {
-      return 0;
     }
+    return 0;
   }
 }
 

@@ -1,9 +1,12 @@
-import '../index.html';  // required for hot-loading for changes in index.html
+import '../index.html'; // required for hot-loading for changes in index.html
+
+/* eslint-disable */
 import Tracks from 'tracks';
 import Toolbox from 'toolbox';
 import SampleTrackLoader from 'sampletracks';
 import cookieParser from 'cookie';
 import Library from 'library';
+/*eslint-enable */
 
 // TODO: what does Symbol.iterator do???
 // setup for using for-of loop for queried dom elements
@@ -18,12 +21,12 @@ if (cookies.name !== 'undefined') {
   signinNav.href = '/';
   const signupNav = document.getElementById('signup-nav-item');
   signupNav.innerHTML = 'Logout';
-  signupNav.href = '/logout';   // this will directly call logout api to the server
+  signupNav.href = '/logout'; // this will directly call logout api to the server
 }
 
 const container = document.getElementById('track-container');
 const tracks = new Tracks(container);
-const toolbox = new Toolbox(container, tracks);
+const toolbox = new Toolbox(container, tracks); // eslint-disable-line no-unused-vars
 const library = new Library(tracks);
 library.createModalElem();
-const sampleTrackLoader = new SampleTrackLoader(tracks);
+const sampleTrackLoader = new SampleTrackLoader(tracks); // eslint-disable-line no-unused-vars

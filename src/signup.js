@@ -1,9 +1,7 @@
-(function() {
-  'use strict';
-
+(function signup() {
   const signinBtn = document.getElementById('signupform');
   signinBtn.addEventListener('submit', (e) => {
-    e.preventDefault();  // prevent default behavior for 'submit' action
+    e.preventDefault(); // prevent default behavior for 'submit' action
 
     const username = document.getElementById('signup-userinput').value;
     const password = document.getElementById('signup-password').value;
@@ -23,14 +21,16 @@
     fetch('/post/signup', fetchoption).then((res) => {
       if (res.ok) {
         return res.text();
-      } else {
-        throw 'Username already exists!';
       }
-    }).then((data) => {
+      throw new function signupException(message) {
+        this.message = message;
+        this.name = 'Sign Up Error';
+      }('User already Exists!');
+    }).then(() => {
       // welcome the user and redirect
-      alert('Hello, ' + name);
+      alert(`Hello, ${name}`);
       window.location = '/';
-    }).catch(err => {
+    }).catch((err) => {
       alert(err);
     });
   }, false);

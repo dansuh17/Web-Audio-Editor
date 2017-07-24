@@ -34,8 +34,7 @@
     "really-need": "^1.9.2",
     "sinon": "^2.3.8",
     "sinon-mongoose": "^2.0.2",
-    "supertest": "^3.0.0",
-    "webpack-dev-server": "^2.5.1"
+    "supertest": "^3.0.0"
   },
   "dependencies": {
     "babel-core": "^6.25.0",
@@ -53,6 +52,7 @@
     "mongoose": "^4.11.3",
     "waves-loaders": "github:ircam-rnd/loaders",
     "waves-ui": "github:wavesjs/ui",
-    "webpack": "^3.1.0"
+    "webpack": "^3.1.0",
+    "webpack-dev-server": "^2.5.1"
   }
 }

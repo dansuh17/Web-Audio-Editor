@@ -1,15 +1,15 @@
 process.env.NODE_ENV = 'test';
 
+/* eslint-disable global-require */
 const assert = require('assert');
 const it = require('mocha').it;
 const describe = require('mocha').describe;
-const beforeEach = require('mocha').beforeEach;
 const before = require('mocha').before;
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const should = require('chai').should();
 const sinon = require('sinon');
 const supertest = require('supertest');
+
 const expect = chai.expect;
 
 // required modules
@@ -17,18 +17,19 @@ const User = require('../models/user');
 const server = require('../app');
 
 require('sinon-mongoose');
+
 chai.use(chaiHttp);
 
 
-describe('Mongoose User Schema Test', function() {
+describe('Mongoose User Schema Test', () => {
   const UserMock = sinon.mock(User);
 
-  it('should find a user by author', function(done) {
+  it('should find a user by author', (done) => {
     UserMock
       .expects('findOne').withArgs({ username: 'username' })
       .resolves('RESULT');
 
-    User.findOneByUsername('username').then(function (result) {
+    User.findOneByUsername('username').then((result) => {
       UserMock.verify();
       UserMock.restore();
       assert.equal(result, 'RESULT');
@@ -36,7 +37,7 @@ describe('Mongoose User Schema Test', function() {
     });
   });
 
-  it('should add audio information to library', function(done) {
+  it('should add audio information to library', (done) => {
     // sample information to store
     const info = {
       username: 'username',
@@ -49,11 +50,11 @@ describe('Mongoose User Schema Test', function() {
     // mock
     UserMock
       .expects('findOneAndUpdate')
-      .withArgs({ username: info.username}, { $push: { library: info.audioInfo }})
+      .withArgs({ username: info.username }, { $push: { library: info.audioInfo } })
       .resolves('RESULT');
 
     // actual test
-    User.addAudioInfoToLibrary(info).then(function (result) {
+    User.addAudioInfoToLibrary(info).then((result) => {
       UserMock.verify();
       UserMock.restore();
       assert.equal(result, 'RESULT');
@@ -63,7 +64,7 @@ describe('Mongoose User Schema Test', function() {
 });
 
 
-describe('Controller Tests', function() {
+describe('Controller Tests', () => {
   let controller;
   let session;
   let res;
@@ -72,16 +73,16 @@ describe('Controller Tests', function() {
     // bring up controller
     controller = require('../controllers/appController');
 
-    session = {  // fake session
+    session = { // fake session
       name: 'dansuh',
       username: 'dansuh@gmail.com',
     };
 
     res = {
-      cookie: (one, two, three) => res,
-      status: (statusNum) => res,
-      sendFile: (path) => res,
-      send: (string) => res,
+      cookie: () => res,
+      status: () => res,
+      sendFile: () => res,
+      send: () => res,
     };
   });
 
@@ -178,7 +179,7 @@ describe('Controller Tests', function() {
 });
 
 
-describe('Test Express Server', function() {
+describe('Test Express Server', () => {
   it('responds to /', (done) => {
     supertest(server)
       .get('/')
@@ -194,20 +195,19 @@ describe('Test Express Server', function() {
       .end((err, res) => {
         res.should.have.status(200);
         done();
-      })
+      });
   });
 
   it('responds to /signup', (done) => {
-    "use strict";
     chai.request(server)
       .get('/signup')
       .end((err, res) => {
         res.should.have.status(200);
         done();
-      })
+      });
   });
 
-  it('404 unknown', function (done) {
+  it('404 unknown', (done) => {
     chai.request(server)
       .get('/blabh')
       .end((err, res) => {

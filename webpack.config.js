@@ -4,37 +4,37 @@ const webpack = require('webpack');
 const DIST_PATH = path.resolve(__dirname, 'dist');
 
 module.exports = {
-  context: __dirname,  // working directory
+  context: __dirname, // working directory
   entry: {
     index: './src/index.js',
     signin: './src/signin.js',
     signup: './src/signup.js',
   },
   output: {
-    filename: '[name].bundle.js',  // [name] is the entry key
-    path: DIST_PATH,  // output path
-    publicPath: '/public/',  // location of static files that would be requested
+    filename: '[name].bundle.js', // [name] is the entry key
+    path: DIST_PATH, // output path
+    publicPath: '/public/', // location of static files that would be requested
   },
   devtool: 'cheap-eval-source-map',
   devServer: {
     port: 8080,
-    hot: true,  // tell the dev server to use HMR
+    hot: true, // tell the dev server to use HMR
     overlay: {
       warnings: true,
       errors: true,
     },
-    publicPath: '/dist',  // contents from webpack served from HERE
-    contentBase: '/public',  // contents from non-webpack
+    publicPath: '/dist', // contents from webpack served from HERE
+    contentBase: '/public', // contents from non-webpack
     index: 'index.html',
     stats: {
-      colors: true,  // good to have pretty outputs
+      colors: true, // good to have pretty outputs
     },
     proxy: {
       '*': 'http://localhost:3000',
     },
   },
   resolve: {
-    extensions: [".js"],
+    extensions: ['.js'],
     modules: [
       'node_modules',
       path.resolve(__dirname, 'src'),
@@ -46,11 +46,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules|dist)/,
         include: /(src|controllers|models|test)/,
-        enforce:'pre',  // pre-load the linter
+        enforce: 'pre', // pre-load the linter
         loader: 'eslint-loader',
         options: {
           cache: true,
-          // failOnError: true,
           outputReport: {
             filePath: 'checkstyle.xml',
           },
@@ -79,6 +78,6 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin()  // Enable HMR
+    new webpack.HotModuleReplacementPlugin(), // Enable HMR
   ],
 };

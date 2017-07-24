@@ -21,7 +21,7 @@ class Tracks {
     this.changePlayRate = this.changePlayRate.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
-    this.setModeForTimeline = this.setModeForTimeline.bind(this);
+    Tracks.setModeForTimeline = Tracks.setModeForTimeline.bind(this);
 
     this.trackIndex = 0;
     this.container = container;
@@ -34,7 +34,7 @@ class Tracks {
       // create audio context - later will desireably become global singleton
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       this.audioCtx = new AudioContext();
-    } catch(e) {
+    } catch (e) {
       alert('This browser does not support Web Audio API!');
     }
   }
@@ -45,10 +45,10 @@ class Tracks {
   toggleMode() {
     this.mode = (this.mode === 'zoom') ? 'selection' : 'zoom';
 
-    for (let trackId of Object.keys(this.tracks)) {
+    Object.keys(this.tracks).forEach((trackId) => {
       const timeline = this.tracks[trackId].timeline;
-      this.setModeForTimeline(timeline, this.mode);
-    }
+      Tracks.setModeForTimeline(timeline, this.mode);
+    });
   }
 
   /**
@@ -56,13 +56,18 @@ class Tracks {
    * @param timeline {Timeline} the track's timeline
    * @param mode {String} the mode string
    */
-  setModeForTimeline(timeline, mode) {
+  static setModeForTimeline(timeline, mode) {
     if (mode === 'zoom') {
+      // eslint-disable-next-line no-param-reassign
       timeline.state = new wavesUI.states.CenteredZoomState(timeline);
     } else if (mode === 'selection') {
+      // eslint-disable-next-line no-param-reassign
       timeline.state = new wavesUI.states.SimpleEditionState(timeline);
     } else {
-      throw 'Invalid Mode for Tracks';
+      throw new function InvalidTrackMode(message) {
+        this.message = message;
+        this.name = 'Invalid Track Mode Exception';
+      }('Invalid Mode for Tracks');
     }
   }
 
@@ -235,8 +240,8 @@ class Tracks {
     if (filename === null || filename === undefined) {
       return;
     }
-    data.append('file', file, filename);  // provide the filename
-    data.append('user', cookies.name);  // send the user name also
+    data.append('file', file, filename); // provide the filename
+    data.append('user', cookies.name); // send the user name also
     data.append('username', cookies.username);
 
     const fetchOptions = {
@@ -297,7 +302,7 @@ class Tracks {
     this.cutBuffer = result.cutBuffer;
 
     this.eraseWave(id);
-    this.renderWave(result.newBuffer, this.audioCtx, id);  // draw the track waveform again
+    this.renderWave(result.newBuffer, this.audioCtx, id); // draw the track waveform again
   }
 
   /**
@@ -349,7 +354,7 @@ class Tracks {
    */
   readSingleFile(e) {
     const file = e.target.files[0];
-    const id = e.target.dataset.trackid;  // obtain track id
+    const id = e.target.dataset.trackid; // obtain track id
     if (!file) {
       return;
     }
@@ -360,8 +365,8 @@ class Tracks {
     const reader = new FileReader();
 
     // when the load is complete, draw the id
-    reader.onload = e => {
-      const contents = e.target.result;
+    reader.onload = (loadEvent) => {
+      const contents = loadEvent.target.result;
       this.drawWave(contents, this.audioCtx, id);
     };
 
@@ -386,21 +391,21 @@ class Tracks {
   }
 
   stopAll() {
-    for (let trackId of Obj.keys(this.tracks)) {
+    Object.keys(this.tracks).forEach((trackId) => {
       this.tracks[trackId].audioSource.stop();
-    }
+    });
   }
 
   pauseAll() {
-    for (let trackId of Obj.keys(this.tracks)) {
+    Object.keys(this.tracks).forEach((trackId) => {
       this.tracks[trackId].audioSource.pause();
-    }
+    });
   }
 
   playAll() {
-    for (let trackId of Obj.keys(this.tracks)) {
+    Object.keys(this.tracks).forEach((trackId) => {
       this.tracks[trackId].audioSource.play();
-    }
+    });
   }
 
   /**
@@ -439,11 +444,11 @@ class Tracks {
     // create timeline and track
     const timeline = new wavesUI.core.Timeline(pixelsPerSecond, width);
     const track = new wavesUI.core.Track($track, layerHeight + timeAxisHeight);
-    timeline.add(track);  // adds the track to the timeline
+    timeline.add(track); // adds the track to the timeline
 
     // time axis
     const timeAxis = new wavesUI.axis.AxisLayer(wavesUI.axis.timeAxisGenerator(), {
-      height: timeAxisHeight
+      height: timeAxisHeight,
     });
 
     // Axis layers use `timeline.TimeContext` directly,
@@ -464,7 +469,7 @@ class Tracks {
     // waveform layer
     const waveformLayer = new wavesUI.helpers.WaveformLayer(audioBuffer, {
       height: layerHeight,
-      top: timeAxisHeight
+      top: timeAxisHeight,
     });
 
     waveformLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
@@ -481,17 +486,17 @@ class Tracks {
     });
     segmentLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
     segmentLayer.configureShape(wavesUI.shapes.AnnotatedSegment, {
-      x: function(d, v) {
+      x(d, v) {
         if (v !== undefined) { d.start = v; }
         return d.start;
       },
-      width: function(d, v) {
+      width(d, v) {
         if (v !== undefined) { d.duration = v; }
         return d.duration;
-      }
+      },
     });
     segmentLayer.setBehavior(new wavesUI.behaviors.SegmentBehavior());
-    this.tracks[trackId]['segmentLayer'] = segmentLayer;
+    this.tracks[trackId].segmentLayer = segmentLayer;
 
     // cursor layer
     const cursorLayer = new wavesUI.helpers.CursorLayer({ height: layerHeight });
@@ -506,7 +511,7 @@ class Tracks {
       cursorLayer,
     });
 
-    this.tracks[trackId]['audioSource'] = audioSourceWrapper;
+    this.tracks[trackId].audioSource = audioSourceWrapper;
 
     // add layers to tracks
     track.add(cursorLayer);
@@ -521,10 +526,10 @@ class Tracks {
     timeline.tracks.render();
     timeline.tracks.update();
 
-    this.tracks[trackId]['timeline'] = timeline;
+    this.tracks[trackId].timeline = timeline;
 
     // set the timeline view mode - either 'selection', or 'zoom'
-    this.setModeForTimeline(timeline, this.mode);
+    Tracks.setModeForTimeline(timeline, this.mode);
   }
 
   /**
@@ -549,9 +554,9 @@ class Tracks {
    * @param trackId{int} the track id number
    */
   drawWave(fileArrayBuffer, audioCtx, trackId) {
-    this.eraseWave(trackId);  // first erase the wave if already exists
+    this.eraseWave(trackId); // first erase the wave if already exists
     // returns AudioBuffer object as a result of decoding the audio
-    audioCtx.decodeAudioData(fileArrayBuffer, buffer => {
+    audioCtx.decodeAudioData(fileArrayBuffer, (buffer) => {
       this.renderWave(buffer, audioCtx, trackId);
     });
   }

@@ -1,5 +1,3 @@
-'use strict';
-
 const path = require('path');
 const fs = require('fs');
 
@@ -10,7 +8,9 @@ const webpack = require('webpack');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const formidable = require('formidable');
+const WebpackDevServer = require('webpack-dev-server');
 
+const webpackConfig = require('./webpack.config');
 const User = require('./models/user');
 const controller = require('./controllers/appController');
 
@@ -21,7 +21,7 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));
 }
 
-/*** DATABASE SETUP ***/
+/** * DATABASE SETUP ** */
 // determine host depending on environment
 let DB_HOST = 'localhost';
 let MONGOPORT = 38128;
@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === 'test') {
   MONGO_COLLECTION = 'webuaudio-test';
 }
 
-let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/${MONGO_COLLECTION}`;
+const MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/${MONGO_COLLECTION}`;
 
 // connect to database
 mongoose.connect(MONGO_URI);
@@ -94,7 +94,7 @@ app.get('/audio/:trackname', (req, res) => {
   readStream.pipe(res);
 
   readStream.on('end', () => {
-    console.log('Reading file completed : ' + starcraftTrack);
+    console.log(`Reading file completed : ${starcraftTrack}`);
   });
 });
 
@@ -107,7 +107,7 @@ app.post('/upload', (req, res) => {
 
   const form = new formidable.IncomingForm();
   form.uploadDir = path.resolve(__dirname, './uploads');
-  form.type = true;  // keep the extension for the file being saved
+  form.type = true; // keep the extension for the file being saved
 
   form.addListener('end', () => {
     console.log(`File upload completed: ${req.session.id}`);
@@ -115,7 +115,7 @@ app.post('/upload', (req, res) => {
   });
 
   // done reading file
-  form.addListener('file', (name, file) => {
+  form.addListener('file', () => {
     res.status(200);
   });
 
@@ -142,9 +142,9 @@ app.post('/upload', (req, res) => {
     };
 
     // add the uploaded audio's information to the user's library
-    User.addAudioInfoToLibrary(info, (err, userDoc) => {
-      if (err) {
-        console.error(err);
+    User.addAudioInfoToLibrary(info, (error) => {
+      if (error) {
+        console.error(error);
       }
     });
   });
@@ -163,7 +163,7 @@ app.get('/library/:username', (req, res) => {
     if (err) res.status(420).end();
 
     if (userDoc) {
-      res.json(userDoc.library);  // send the json data
+      res.json(userDoc.library); // send the json data
     } else {
       res.status(420).send('No user information found.');
     }
@@ -184,7 +184,7 @@ app.get('/useraudio/:username/:url', (req, res) => {
   readStream.pipe(res);
 
   readStream.on('end', () => {
-    console.log('Sending library file completed : ' + url);
+    console.log(`Sending library file completed : ${url}`);
   });
 });
 
@@ -195,21 +195,19 @@ app.use(controller.notFound);
 if (process.env.NODE_ENV === 'development') {
   const devPort = process.env.DEVPORT || 8080;
 
-  const webpackDevServer = require('webpack-dev-server');
-  const webpackConfig = require('./webpack.config');
   const compiler = webpack(webpackConfig);
-  const devServer = new webpackDevServer(compiler, webpackConfig.devServer);
+  const devServer = new WebpackDevServer(compiler, webpackConfig.devServer);
 
   // start listening
   devServer.listen(devPort, () => {
-    console.log('Dev Server listening on : ' + devPort);
+    console.log(`Dev Server listening on : ${devPort}`);
   });
 }
 
 // start listening
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-  console.log('Server listening on: ' + port);
+  console.log(`Server listening on: ${port}`);
 });
 
 // export the server for testing

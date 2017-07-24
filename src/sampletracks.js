@@ -12,12 +12,12 @@ class SampleTrackLoader {
   attachListener() {
     const sampleTrackItems = document.getElementsByClassName('sampletrack-item');
 
-    for (let elem of sampleTrackItems) {
+    sampleTrackItems.forEach((elem) => {
       elem.addEventListener('click', () => {
         const audioName = elem.dataset.value;
         this.createSampleTrack(audioName);
-      })
-    }
+      });
+    });
   }
 
   /**
@@ -28,12 +28,10 @@ class SampleTrackLoader {
     const url = `/audio/${audioName}`;
 
     // use fetch API to get a stream of audio file data for track creation
-    fetch(url).then((res) => {
-      return res.arrayBuffer();
-    }).then((buffer) => {
+    fetch(url).then(res => res.arrayBuffer()).then((buffer) => {
       this.tracksInstance.createTrackForBuffer(buffer);
     }).catch((error) => {
-      console.error('Failed to load : ' + url);
+      console.error(`Failed to load : ${url}`);
       console.error(error);
     });
   }

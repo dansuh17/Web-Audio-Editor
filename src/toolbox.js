@@ -88,25 +88,25 @@ class Toolbox {
 
     // enable mode toggling
     const modeSelectionRadio = document.getElementsByName('mode');
-    for (let elem of modeSelectionRadio) {
+    modeSelectionRadio.forEach((elem) => {
       elem.addEventListener('click', () => {
-        for (let childElem of modeSelectionRadio) {
+        modeSelectionRadio.forEach((childElem) => {
           if (childElem !== elem) {
-            childElem.className = 'btn btn-secondary';
+            childElem.className = 'btn btn-secondary'; // eslint-disable-line no-param-reassign
           } else {
             // activate this button
-            childElem.className = 'btn btn-primary';
+            childElem.className = 'btn btn-primary'; // eslint-disable-line no-param-reassign
           }
-        }
+        });
 
         // send the Tracks instance the toggle signal
         this.tracks.toggleMode();
       }, false);
-    }
+    });
 
     // add low pass filter listener
     const lpFilter = document.getElementById('lpf');
-    lpFilter.addEventListener('click', () =>{
+    lpFilter.addEventListener('click', () => {
       this.tracks.applyLpFilter();
     }, false);
 
