@@ -6,6 +6,7 @@ const it = require('mocha').it;
 const describe = require('mocha').describe;
 const before = require('mocha').before;
 const chai = require('chai');
+const should = require('chai').should(); // eslint-disable-line no-unused-vars
 const chaiHttp = require('chai-http');
 const sinon = require('sinon');
 const supertest = require('supertest');
