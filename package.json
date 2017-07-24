@@ -9,7 +9,9 @@
     "dev": "NODE_ENV=development node app.js",
     "start": "NODE_ENV=production node app.js",
     "test": "mocha --timeout 10000",
-    "test-jenkins": "MOCHA_FILE=./jenkins-test-results.xml mocha test/** --reporter mocha-junit-reporter"
+    "test-jenkins": "MOCHA_FILE=./jenkins-test-results.xml mocha test/** --reporter mocha-junit-reporter",
+    "lint": "eslint -c .eslintrc .",
+    "lint-file": "eslint -c .eslintrc -f checkstyle > eslint_result.xml"
   },
   "repository": {
     "type": "git",

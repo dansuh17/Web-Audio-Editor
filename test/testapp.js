@@ -43,7 +43,7 @@ describe('Mongoose User Schema Test', () => {
     const info = {
       username: 'username',
       audioInfo: {
-        audiotitle: 'audiotitle',
+        audiotitle: 'title',
         url: '/user/somewhere',
       },
     };

@@ -9,3 +9,4 @@ uploads
 README.md
 jenkins-test-results.xml
 *.iml
+eslint_result.xml

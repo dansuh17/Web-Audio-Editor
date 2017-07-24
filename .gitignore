@@ -107,3 +107,4 @@ dist
 *bundle.js
 uploads/
 jenkins-test-results.xml
+eslint_result.xml

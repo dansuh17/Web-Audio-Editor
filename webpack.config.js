@@ -49,9 +49,9 @@ module.exports = {
         enforce: 'pre', // pre-load the linter
         loader: 'eslint-loader',
         options: {
-          cache: true,
+          cache: false,
           outputReport: {
-            filePath: 'checkstyle.xml',
+            filePath: '../checkstyle.xml',
           },
         },
       },
