@@ -8,12 +8,16 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /tmp/webaudio
 WORKDIR /tmp/webaudio
 
+# install dependencies
+COPY package.json /tmp/webaudio
+RUN npm install
+
 # copy project files into the container
 COPY . /tmp/webaudio
 
-# install dependencies and build
-RUN npm install
+# build
 RUN npm run build
+RUN echo build done
 
 # expose 3000 as normal - expose 80 for docker run command for deployment
 EXPOSE 3000

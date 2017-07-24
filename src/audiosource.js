@@ -21,6 +21,9 @@ class AudioSourceWrapper {
     this.updateCursor = this.updateCursor.bind(this);
     this.cut = this.cut.bind(this);
     this.paste = this.paste.bind(this);
+    this.setPlayRate = this.setPlayRate.bind(this);
+    this.fadeIn = this.fadeIn.bind(this);
+    this.fadeOut = this.fadeOut.bind(this);
 
     // create a gain node
     const gainNode = this.audioCtx.createGain();
@@ -58,6 +61,14 @@ class AudioSourceWrapper {
     this.sourceConnectPoint = this.gainNode;
     this.source.connect(this.sourceConnectPoint);
     this.filter = null;
+  }
+
+  /**
+   * Sets the playback rate of this source.
+   * @param rate {Number} desired playback rate
+   */
+  setPlayRate(rate) {
+    this.source.playbackRate.value = rate;
   }
 
   /**
@@ -103,6 +114,72 @@ class AudioSourceWrapper {
     if (this.source) {
       this.source.disconnect();
     }
+  }
+
+  /**
+   * Fades in - the track's 10% will be faded in with linear increase in amplitude.
+   */
+  fadeIn() {
+    // stop before modifying waveforms
+    this.stop();
+
+    const buffer = this.buffer;
+    const originalFrames = buffer.length;
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = this.audioCtx.sampleRate;
+
+    const fadeEndFrame = Math.floor(originalFrames / 10);
+
+    const newBuffer = this.audioCtx.createBuffer(numChannels, originalFrames, sampleRate);
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const nowBuffer = newBuffer.getChannelData(channel);
+
+      for (let i = 0; i < originalFrames; i++) {
+        if (i < fadeEndFrame) {
+          nowBuffer[i] = oldBufferChannelData[i] * (i / fadeEndFrame);  // linear fade in
+        } else {
+          nowBuffer[i] = oldBufferChannelData[i];
+        }
+      }
+    }
+
+    this.buffer = newBuffer;
+    return newBuffer;
+  }
+
+  /**
+   * Fades out - the track's last 10% will be fading out.
+   */
+  fadeOut() {
+    // stop before modifying waveforms
+    this.stop();
+
+    const buffer = this.buffer;
+    const originalFrames = buffer.length;
+    const numChannels = buffer.numberOfChannels;
+    const sampleRate = this.audioCtx.sampleRate;
+
+    const fadeStartFrame = Math.floor(originalFrames * 0.9);
+    const fadeDurationFrame = originalFrames - fadeStartFrame;
+
+    const newBuffer = this.audioCtx.createBuffer(numChannels, originalFrames, sampleRate);
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const nowBuffer = newBuffer.getChannelData(channel);
+
+      for (let i = 0; i < originalFrames; i++) {
+        if (i >= fadeStartFrame) {
+          const elapsedAfterFade = i - fadeStartFrame;
+          nowBuffer[i] = oldBufferChannelData[i] * ((fadeDurationFrame - elapsedAfterFade) / fadeDurationFrame);  // linear fade in
+        } else {
+          nowBuffer[i] = oldBufferChannelData[i];
+        }
+      }
+    }
+
+    this.buffer = newBuffer;
+    return newBuffer;
   }
 
   /**

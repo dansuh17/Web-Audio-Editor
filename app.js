@@ -44,7 +44,7 @@ let MONGO_URI = `mongodb://${DB_HOST}:${MONGOPORT}/${MONGO_COLLECTION}`;
 mongoose.connect(MONGO_URI);
 const db = mongoose.connection;
 db.once('open', () => { console.log('Database connected.'); });
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', console.log.bind(console, 'connection error:'));
 
 // body parsers & cookie parser middlewares
 app.use(bodyParser.json());

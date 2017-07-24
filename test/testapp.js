@@ -69,13 +69,6 @@ describe('Mongoose User Schema Test', function() {
 
 
 describe('Test Express Server', function() {
-  beforeEach(function(done) {
-    // remove all User data instances for test database before testing
-    User.remove({}, (err) => {
-      done();
-    })
-  });
-
   it('responds to /', (done) => {
     chai.request(server)
       .get('/')

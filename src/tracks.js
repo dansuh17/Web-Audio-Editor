@@ -18,6 +18,7 @@ class Tracks {
     this.stop = this.stop.bind(this);
     this.pause = this.pause.bind(this);
     this.changeVolume = this.changeVolume.bind(this);
+    this.changePlayRate = this.changePlayRate.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
     this.setModeForTimeline = this.setModeForTimeline.bind(this);
@@ -84,6 +85,20 @@ class Tracks {
     this.tracks[id].audioSource.applyLpFilter();
   }
 
+  fadeIn() {
+    const id = this.currentTrackId;
+    const newAudioBuffer = this.tracks[id].audioSource.fadeIn();
+    this.eraseWave(id);
+    this.renderWave(newAudioBuffer, this.audioCtx, id);
+  }
+
+  fadeOut() {
+    const id = this.currentTrackId;
+    const newAudioBuffer = this.tracks[id].audioSource.fadeOut();
+    this.eraseWave(id);
+    this.renderWave(newAudioBuffer, this.audioCtx, id);
+  }
+
   /**
    * Create a new track. Append to the container.
    *
@@ -111,6 +126,10 @@ class Tracks {
           </div>
           <input type="range" id="volumeSlider${trackId}" data-trackid="${trackId}"
                  value="50" min="0" max="100" step="1" />
+          <span>volume</span>
+          <input type="range" id="playRate${trackId}" data-trackid="${trackId}"
+                 value="1" min="0.25" max="3" step="0.25" />
+          <span>play rate</span>
           <br />
           <input type="file" id="fileinput${trackId}"
             data-trackid="${trackId}"/>
@@ -163,10 +182,20 @@ class Tracks {
     const volumeSlider = document.getElementById(`volumeSlider${trackId}`);
     volumeSlider.addEventListener('change', this.changeVolume, false);
 
+    const speedSlider = document.getElementById(`playRate${trackId}`);
+    speedSlider.addEventListener('change', this.changePlayRate, false);
+
     // increase track number
     this.increaseTrackNum();
 
     return trackId;
+  }
+
+  changePlayRate(e) {
+    const id = e.target.dataset.trackid;
+    const rate = e.target.value;
+
+    this.tracks[id].audioSource.setPlayRate(rate);
   }
 
   /**

@@ -54,6 +54,12 @@ class Toolbox {
               <button type="button" class="btn btn-secondary" id="lpf">
                 Low Pass Filter
               </button>
+              <button type="button" class="btn btn-secondary" id="fadeInBtn">
+                Fade In
+              </button>
+              <button type="button" class="btn btn-secondary" id="fadeOutBtn">
+                Fade Out
+              </button>
             </div>
             
             <!-- mode selection -->
@@ -135,6 +141,16 @@ class Toolbox {
     const pasteBtn = document.getElementById('pasteBtn');
     pasteBtn.addEventListener('click', () => {
       this.tracks.paste();
+    });
+
+    const fadeInBtn = document.getElementById('fadeInBtn');
+    fadeInBtn.addEventListener('click', () => {
+      this.tracks.fadeIn();
+    });
+
+    const fadeOutBtn = document.getElementById('fadeOutBtn');
+    fadeOutBtn.addEventListener('click', () => {
+      this.tracks.fadeOut();
     });
   }
 }
