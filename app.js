@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 const formidable = require('formidable');
 
 const User = require('./models/user');
+const controller = require('./controllers/appController');
 
 const app = express();
 
@@ -71,85 +72,22 @@ app.set('view engine', 'html');
 app.set('views', './views');
 
 // send index.html at default GET
-app.get('/', (req, res, next) => {
-  const sess = req.session;
-
-  res  // test cookie
-    .cookie('name', sess.name, { maxAge: 360000 })  // cookies expire after 360s
-    .cookie('username', sess.username, { maxAge: 360000 })  // cookies expire after 360s
-    .status(200)
-    .sendFile(path.resolve(__dirname, 'index.html'));
-});
+app.get('/', controller.getRoot);
 
 // sign-in page
-app.get('/signin', (req, res) => {
-  res.status(200).sendFile(path.resolve(VIEWPATH, 'signin.html'));
-});
+app.get('/signin', controller.signIn);
 
 // sign-up page
-app.get('/signup', (req, res) => {
-  res.sendFile(path.resolve(VIEWPATH, 'signup.html'));
-});
+app.get('/signup', controller.signUp);
 
 // sign-in request
-app.post('/post/signin', (req, res) => {
-  const username = req.body.username;
-
-  User.findOneByUsername(username, (err, userDoc) => {
-    if (userDoc) {
-      if (userDoc.password === req.body.password) {  // check for password
-        if (userDoc.name) {
-          // make sure 'credentials: include' for fetch api!
-          req.session.name = userDoc.name;
-        } else {
-          req.session.name = userDoc.username;
-        }
-        req.session.username = userDoc.username;
-        req.session.save();
-        res.status(200).send({ username });
-      } else {
-        res.status(420).send('Incorrect password.');
-      }
-    } else {
-      res.status(420).send('Username does not exist.');
-    }
-  });
-});
+app.post('/post/signin', controller.postSignIn);
 
 // signup request
-app.post('/post/signup', (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  const name = req.body.name;
-
-  // try to save user information, unless the username already exists
-  const user = new User({
-    username,
-    password,
-    name
-  });
-
-  user.save((err, userDoc) => {
-    if (err) {
-      res.status(420).send('User name already exists!');
-    } else {
-      res.sendStatus(200);
-    }
-  });
-});
+app.post('/post/signup', controller.postSignUp);
 
 // logout request
-app.get('/logout', (req, res) => {
-  const sess = req.session;
-  // if there is a user logged in, destroy the session
-  if (sess.username) {
-    sess.destroy(err => {
-      if (err) console.error(err);
-    });
-  }
-
-  res.redirect('/');
-});
+app.get('/logout', controller.logOut);
 
 // request sample track
 app.get('/audio/:trackname', (req, res) => {
@@ -254,11 +192,7 @@ app.get('/useraudio/:username/:url', (req, res) => {
 });
 
 // not found message
-app.use((req, res, next) => {
-  const err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+app.use(controller.notFound);
 
 // run the server on development mode
 if (process.env.NODE_ENV === 'development') {
