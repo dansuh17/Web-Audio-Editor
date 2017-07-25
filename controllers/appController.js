@@ -40,7 +40,7 @@ function postSignIn(req, res) {
         }
         req.session.username = userDoc.username;
         req.session.save();
-        const username = userDoc.username;
+        const username = userDoc.username || userDoc.name;
         res.status(200).send({ username });
       } else {
         res.status(420).send('Incorrect password.');
@@ -50,8 +50,7 @@ function postSignIn(req, res) {
     }
   }
 
-  const username = req.body.username;
-  User.findOneByUsername(username, checkCredentials);
+  User.findOneByUsername(req.body.username, checkCredentials);
 }
 
 // signup database save

@@ -58,7 +58,7 @@ class Library {
     this.getLibraryInfo();
     const listgroup = document.getElementById('library-modal-listgroup');
 
-    // much fater than setting an empty innerHTML
+    // much faster than setting an empty innerHTML
     // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
     while (listgroup.firstChild) {
       listgroup.removeChild(listgroup.firstChild);

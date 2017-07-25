@@ -27,8 +27,8 @@
       // welcome the user and redirect
       alert(`Welcome, ${data.username}`);
       window.location = '/';
-    }).catch((err) => {
-      alert(err);
+    }).catch(() => {
+      alert('Failed to login.');
     });
   }, false);
 }());
