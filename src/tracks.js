@@ -515,7 +515,7 @@ class Tracks {
       start: 1,
       duration: 2,
       color: 'orange',
-      text: 'selection',
+      text: '', // no label
     }];
     const segmentLayer = new wavesUI.core.Layer('collection', segmentData, {
       height: layerHeight,

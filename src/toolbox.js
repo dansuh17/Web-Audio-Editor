@@ -29,6 +29,12 @@ class Toolbox {
                 <a class="sampletrack-item" data-value="itsgonnarain" href="#"> It's Gonna Rain</a>
                 <br />
                 <a class="sampletrack-item" data-value="exhale" href="#"> Exhale</a>
+                <br />
+                <a class="sampletrack-item" data-value="hanulbaragi" href="#"> HanulBaragi</a>
+                <br />
+                <a class="sampletrack-item" data-value="shapeofyou" href="#"> ShapeOfYou</a>
+                <br />
+                <a class="sampletrack-item" data-value="dinosaur" href="#"> Dinosaur</a>
               </div>
             </div>
             
