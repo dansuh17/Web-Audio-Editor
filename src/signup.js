@@ -31,8 +31,8 @@
       // welcome the user and redirect
       alert(`Hello, ${name}`);
       window.location = '/';
-    }).catch((err) => {
-      alert(err);
+    }).catch(() => {
+      alert('User already Exists!');
     });
   }, false);
 }());

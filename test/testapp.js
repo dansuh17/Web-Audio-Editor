@@ -307,7 +307,74 @@ describe('Controller Tests', () => {
         deleteTempFile(TEMP_FILE_NAME, done);
       });
     });
+
+    it('sends the file according to the track name requested: dinosaur', (done) => {
+      const audioFilename = 'dinosaur';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
+
+    it('sends the file according to the track name requested: shapeofyou', (done) => {
+      const audioFilename = 'shapeofyou';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
+
+    it('sends the file according to the track name requested: hanulbaragi', (done) => {
+      const audioFilename = 'hanulbaragi';
+      const req = {
+        params: {
+          trackname: audioFilename,
+        },
+      };
+      const writeStream = fs.createWriteStream(TEMP_FILE_NAME);
+
+      controller.audioReqByTrackName(req, writeStream);
+
+      writeStream.on('finish', () => {
+        const testBuf = fs.readFileSync(TEMP_FILE_NAME);
+        const expectedBuf = getOriginalData(audioFilename);
+
+        // compare the contents
+        assert(testBuf.toString() === expectedBuf.toString());
+        // delete the temporary file and done
+        deleteTempFile(TEMP_FILE_NAME, done);
+      });
+    });
   });
+
 
   describe('upload', () => {
     it('fails with no session', (done) => {

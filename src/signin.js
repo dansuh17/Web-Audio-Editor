@@ -25,7 +25,7 @@
       throw res.statusMessage; // throw with a message
     }).then((data) => {
       // welcome the user and redirect
-      alert(`Welcome, ${data.usernmae}`);
+      alert(`Welcome, ${data.username}`);
       window.location = '/';
     }).catch((err) => {
       alert(err);

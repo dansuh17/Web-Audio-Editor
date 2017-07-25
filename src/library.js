@@ -30,7 +30,6 @@ class Library {
       this.username = null;
       this.libraryNavBtn.classList.add('disabled');
     } else {
-      console.log(cookies);
       this.username = cookies.username;
       this.libraryNavBtn.classList.remove('disabled');
     }
@@ -56,7 +55,14 @@ class Library {
    * Attach the library information in the modal.
    */
   onShown() {
+    this.getLibraryInfo();
     const listgroup = document.getElementById('library-modal-listgroup');
+
+    // much fater than setting an empty innerHTML
+    // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
+    while (listgroup.firstChild) {
+      listgroup.removeChild(listgroup.firstChild);
+    }
 
     this.libraryList.forEach((audioObj) => {
       const listElemString = `
