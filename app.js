@@ -19,7 +19,7 @@ if (!fs.existsSync(path.resolve(__dirname, './uploads'))) {
   fs.mkdirSync(path.resolve(__dirname, './uploads'));
 }
 
-/** * DATABASE SETUP ** */
+// DATABASE SETUP
 // determine host depending on environment
 let DB_HOST = 'localhost';
 let MONGOPORT = 38128;
