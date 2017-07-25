@@ -112,40 +112,62 @@ class Tracks {
   createTrack(container) {
     const trackId = this.trackIndex;
     const elemString = `
-      <div class="row align-items-center" id="trackbox${trackId}"
+      <div class="row align-items-center"
       data-trackid="${trackId}">
-        <div class="col">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="btn-group" role="group">
             <button type="button" class="btn btn-secondary"
             data-trackid="${trackId}" id="play${trackId}">
-              Play
+              <i class="fa fa-play" data-trackid="${trackId}"></i>
             </button>
             <button type="button" class="btn btn-secondary"
             data-trackid="${trackId}" id="pause${trackId}">
-              Pause
+              <i class="fa fa-pause" data-trackid="${trackId}"></i>
             </button>
             <button type="button" class="btn btn-secondary"
             data-trackid="${trackId}" id="stop${trackId}">
-              Stop
+              <i class="fa fa-stop" data-trackid="${trackId}"></i>
+            </button>
+            <button type="button" class="btn btn-secondary"
+            data-trackid="${trackId}" id="download${trackId}">
+              <i class="fa fa-download" data-trackid="${trackId}"></i> Download
+            </button>
+            <button type="button" class="btn btn-secondary"
+            data-trackid="${trackId}" id="upload${trackId}">
+              <i class="fa fa-upload" data-trackid="${trackId}"></i> Upload
             </button>
           </div>
-          <input type="range" id="volumeSlider${trackId}" data-trackid="${trackId}"
-                 value="50" min="0" max="100" step="1" />
-          <span>volume</span>
-          <input type="range" id="playRate${trackId}" data-trackid="${trackId}"
-                 value="1" min="0.25" max="3" step="0.25" />
-          <span>play rate</span>
-          <br />
-          <input type="file" id="fileinput${trackId}"
-            data-trackid="${trackId}"/>
-          <button type="button" class="btn btn-secondary"
-          data-trackid="${trackId}" id="download${trackId}">
-            Download File
+        </div>
+        <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12" data-trackid="${trackId}">
+          <div class="row">
+            <div class="col-lg-6 col-md-6">
+              <div style="margin-bottom: 20px;">
+                <input type="range" id="volumeSlider${trackId}" data-trackid="${trackId}"
+                       value="50" min="0" max="100" step="1"
+                       style="width: 80px; height: auto; transform: rotate(-90deg);"/>
+              </div>
+              <p>volume</p>
+            </div>
+            <div class="col-lg-6 col-md-6">
+              <div style="margin-bottom: 20px;">
+                <input type="range" id="playRate${trackId}" data-trackid="${trackId}"
+                       value="1" min="0.25" max="3" step="0.25"
+                       style="width: 80px; height: auto; transform: rotate(-90deg);"/>
+              </div>
+              <p>playrate</p>
+            </div>
+          </div>
+          <!-- file input section: do not show the file input tag, but the button delegates the click -->
+          <input type="file" id="fileinput${trackId}" class="form-control-file" style="display: none;"
+            data-trackid="${trackId}" />
+          <button type="button" class="btn btn-sm btn-secondary"
+                  onclick="document.getElementById('fileinput${trackId}').click()">
+            <i class="fa fa-file-audio-o"></i> File
           </button>
-          <button type="button" class="btn btn-secondary"
-          data-trackid="${trackId}" id="upload${trackId}">
-            Upload File
-          </button>
+        </div>
+        <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12" id="trackbox${trackId}"
+             data-trackid="${trackId}">
+          <!-- track waveform visualization goes here -->
         </div>
       </div>
       `;
@@ -381,15 +403,6 @@ class Tracks {
     this.drawWave(arrayBuffer, this.audioCtx, trackId);
   }
 
-  /**
-   * Wrapper method for AudioSourceWrapper's stop()
-   * @param e event node
-   */
-  stop(e) {
-    const id = e.target.dataset.trackid;
-    this.tracks[id].audioSource.stop();
-  }
-
   stopAll() {
     Object.keys(this.tracks).forEach((trackId) => {
       this.tracks[trackId].audioSource.stop();
@@ -409,11 +422,22 @@ class Tracks {
   }
 
   /**
+   * Wrapper method for AudioSourceWrapper's stop()
+   * @param e event node
+   */
+  stop(e) {
+    const id = e.target.dataset.trackid;
+    console.log(this.tracks);
+    this.tracks[id].audioSource.stop();
+  }
+
+  /**
    * Wrapper method for AudioSourceWrapper's pause()
    * @param e event node
    */
   pause(e) {
     const id = e.target.dataset.trackid;
+    console.log(this.tracks);
     this.tracks[id].audioSource.pause();
   }
 
@@ -423,6 +447,7 @@ class Tracks {
    */
   play(e) {
     const id = e.target.dataset.trackid;
+    console.log(this.tracks);
     this.tracks[id].audioSource.play();
   }
 
@@ -455,16 +480,6 @@ class Tracks {
     // they don't have their own timeContext
     timeAxis.setTimeContext(timeline.timeContext);
     timeAxis.configureShape(wavesUI.shapes.Ticks, {}, { color: 'steelblue' });
-
-    // // bpm grid axis
-    // const grid = new wavesUI.axis.AxisLayer(wavesUI.axis.gridAxisGenerator(138, '4/4'), {
-    //   height: layerHeight,
-    //   top: timeAxisHeight
-    // });
-    //
-    // // create grids
-    // grid.setTimeContext(timeline.timeContext);
-    // grid.configureShape(wavesUI.shapes.Ticks, {}, { color: 'green' });
 
     // waveform layer
     const waveformLayer = new wavesUI.helpers.WaveformLayer(audioBuffer, {

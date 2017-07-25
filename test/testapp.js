@@ -318,6 +318,7 @@ describe('Controller Tests', () => {
 
       status.restore();
       send.restore();
+
       assert(status.calledWith(420));
       assert(send.calledWith('Session information unavailable!'));
       done();
@@ -329,6 +330,7 @@ describe('Controller Tests', () => {
       const status = sinon.spy(res, 'status');
 
       controller.libraryInfo({ params: { username: 'undefined' } }, res);
+
       status.restore();
       assert(status.calledWith(420));
       done();

@@ -31,26 +31,28 @@ class Toolbox {
             <!-- Effects & editing functionalities. -->
             <div class="btn-group" role="group">
               <button type="button" class="btn btn-secondary" id="${this.id}">
-                Add Track
+                <i class="fa fa-plus"></i> Add Track
               </button>
               <button type="button" class="btn btn-secondary" id="cutBtn">
-                Cut
+                <i class="fa fa-scissors"></i> Cut
               </button>
               <button type="button" class="btn btn-secondary" id="pasteBtn">
-                Paste
+                <i class="fa fa-clipboard"></i> Paste
               </button>
               <button type="button" class="btn btn-secondary" id="leaveBtn">
-                Leave
+                <i class="fa fa-pencil-square-o"></i> Leave
               </button>
               <button type="button" class="btn btn-secondary" id="playAllBtn">
-                Play All
+                <i class="fa fa-play-circle"></i> Play All
               </button>
               <button type="button" class="btn btn-secondary" id="pauseAllBtn">
-                Pause All
+                <i class="fa fa-pause-circle"></i> Pause All
               </button>
               <button type="button" class="btn btn-secondary" id="stopAllBtn">
-                Stop All
+                <i class="fa fa-stop-circle"></i> Stop All
               </button>
+            </div>
+            <div class="btn-group" role="group">
               <button type="button" class="btn btn-secondary" id="lpf">
                 Low Pass Filter
               </button>
@@ -65,10 +67,10 @@ class Toolbox {
             <!-- mode selection -->
             <div class="btn-group" role="group">
               <button type="button" name="mode" value="zoom" class="btn btn-primary">
-                Zoom Mode
+                <i class="fa fa-search-plus"></i> Zoom Mode
               </button>
               <button type="button" name="mode" value="selection" class="btn btn-secondary">
-                Selection Mode
+                <i class="fa fa-hand-lizard-o"></i> Selection Mode
               </button>
             </div>
           </div>

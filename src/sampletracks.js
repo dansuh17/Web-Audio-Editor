@@ -12,7 +12,8 @@ class SampleTrackLoader {
   attachListener() {
     const sampleTrackItems = document.getElementsByClassName('sampletrack-item');
 
-    sampleTrackItems.forEach((elem) => {
+    // Array.from() creates an array from array-like structure
+    Array.from(sampleTrackItems).forEach((elem) => {
       elem.addEventListener('click', () => {
         const audioName = elem.dataset.value;
         this.createSampleTrack(audioName);

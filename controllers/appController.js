@@ -29,7 +29,7 @@ function signUp(req, res) {
 
 // signup authentication
 function postSignIn(req, res) {
-  function checkCredentials(error, userDoc) {
+  function checkCredentials(err, userDoc) {
     if (userDoc) {
       if (userDoc.password === req.body.password) { // check for password
         if (userDoc.name) {
