@@ -22,6 +22,7 @@
       if (res.ok) {
         return res.text();
       }
+
       throw new function signupException(message) {
         this.message = message;
         this.name = 'Sign Up Error';

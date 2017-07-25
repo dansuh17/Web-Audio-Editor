@@ -15,6 +15,9 @@ class AudioSourceWrapper {
     this.isPlaying = false;
     this.destination = this.audioCtx.destination;
     this.filter = null;
+    this.convolver = null;
+    this.wetGain = null;
+    this.reverbOn = false;
 
     // methods binding to this
     this.pause = this.pause.bind(this);
@@ -24,6 +27,9 @@ class AudioSourceWrapper {
     this.setPlayRate = this.setPlayRate.bind(this);
     this.fadeIn = this.fadeIn.bind(this);
     this.fadeOut = this.fadeOut.bind(this);
+    this.applyReverb = this.applyReverb.bind(this);
+    this.mixDryWet = this.mixDryWet.bind(this);
+    this.connectSource = this.connectSource.bind(this);
 
     // create a gain node
     const gainNode = this.audioCtx.createGain();
@@ -38,29 +44,58 @@ class AudioSourceWrapper {
   }
 
   /**
-   * Apply low-pass filter to the entire audio source.
+   * Apply biquad filter to this audio track.
+   * @param type {String} the type of this filter (ex. 'lowpass')
+   * @param freq {Number} the frequency in Hz to apply the filter on
+   * @param gain {Number} the gain
    */
-  applyLpFilter() {
+  applyBiquadFilter(type, freq, gain) {
+    let biquadFilter;
+
+    // retrieve the filter
+    if (this.filter !== null) {
+      biquadFilter = this.filter;
+    } else {
+      biquadFilter = this.audioCtx.createBiquadFilter();
+    }
+
     // define the filter
-    const biquadFilter = this.audioCtx.createBiquadFilter();
-    biquadFilter.type = 'lowshelf';
-    biquadFilter.frequency.value = 1000;
-    biquadFilter.gain.value = 25;
+    biquadFilter.type = type;
+    biquadFilter.frequency.value = freq;
+    biquadFilter.gain.value = gain;
 
     // connect the filter into the pipeline
-    this.filter = biquadFilter;
-    biquadFilter.connect(this.filterConnectPoint);
-    this.sourceConnectPoint = this.filter;
+    if (this.filter === null) {
+      this.filter = biquadFilter;
+      biquadFilter.connect(this.filterConnectPoint);
+      this.sourceConnectPoint = this.filter;
+    }
+
+    // apply the differences
+    this.pause();
+    this.play();
   }
 
   /**
-   * Disconnects the filter from the destination.
+   * Disconnects the filter from the destination, if filter already exists.
    */
   disconnectFilter() {
-    this.filter.disconnect();
-    this.sourceConnectPoint = this.gainNode;
-    this.source.connect(this.sourceConnectPoint);
-    this.filter = null;
+    this.pause();
+
+    if (this.filter !== null) {
+      this.filter.disconnect();
+      this.sourceConnectPoint = this.gainNode;
+
+      this.disconnectSource();
+      this.connectSource();
+
+      this.filter = null;
+    }
+
+    // mark reverb availability to false
+    this.reverbOn = false;
+
+    this.play();
   }
 
   /**
@@ -82,19 +117,95 @@ class AudioSourceWrapper {
   }
 
   /**
+   * Mix the dry and wet buses.
+   * @param wetVal {Number} the value of wet track in range [0.0, 1.0]
+   */
+  mixDryWet(wetVal = 0.0) {
+    if (this.wetGain === null) {
+      return;
+    }
+
+    this.wetGain.gain.value = wetVal;
+    this.gainNode.gain.value = 1 - wetVal; // dry value
+  }
+
+  /**
+   * Apply reverb to the track.
+   * It uses an impulse response file taken from St. Patrick's Church, Patrington.
+   * The wet/dry ration is fixed for demonstration purposes.
+   */
+  applyReverb() {
+    this.pause();
+    this.reverbOn = true;
+
+    if (this.convolver === null) {
+      // read in impulse file from the server
+      fetch('/impulse')
+        .then(res => res.arrayBuffer())
+        .then((buffer) => {
+          this.audioCtx.decodeAudioData(buffer, (audioBuffer) => {
+            const convolver = this.audioCtx.createConvolver();
+            const wetGain = this.audioCtx.createGain();
+            wetGain.gain.value = 0;
+
+            convolver.buffer = audioBuffer;
+
+            // connect the nodes
+            convolver.connect(wetGain);
+            wetGain.connect(this.destination);
+
+            this.convolver = convolver;
+            this.wetGain = wetGain;
+
+            // mix the dry and wet
+            this.mixDryWet(0.7);
+
+            // let the apply change
+            this.play();
+          });
+        })
+        .catch(err => alert(`Cannot load impulse response file. ${err}`));
+    } else {
+      this.play();
+    }
+  }
+
+  /**
+   * Connect the source to various nodes depending on availability.
+   */
+  connectSource() {
+    if (this.source !== null) {
+      // connect to the connecting point
+      this.source.connect(this.sourceConnectPoint);
+
+      // connect also to the wet convolver pipe if it exists
+      if (this.reverbOn && (this.convolver !== null)) {
+        this.source.connect(this.convolver);
+        this.convolver.connect(this.wetGain);
+        this.wetGain.connect(this.destination);
+      }
+    }
+  }
+
+  /**
    * Play the source buffer. Web Audio API forces to create new AudioBufferSource
    * for every playback. Once it begins playing, it cannot be played again,
    * although stop() can be called multiple times.
    */
   play() {
+    if (this.isPlaying) {
+      // the source is already playing
+      return;
+    }
+
     const newSource = this.audioCtx.createBufferSource();
     newSource.buffer = this.buffer;
+    this.source = newSource;
 
     // connect the source either directly to speaker or the filter
-    newSource.connect(this.sourceConnectPoint);
+    this.connectSource();
 
     // start from paused position (which will be 0 if newly created)
-    this.source = newSource;
     this.source.start(0, this.pausedAt);
     this.startedAt = this.audioCtx.currentTime - this.pausedAt;
     this.pausedAt = 0;
@@ -242,7 +353,6 @@ class AudioSourceWrapper {
    */
   paste(data, cutBuffer) {
     this.stop(); // stop before modifying the source node
-    console.log(cutBuffer);
 
     if (cutBuffer === null) {
       return null; // if nothing is cut and stored before, do nothing.
@@ -288,6 +398,44 @@ class AudioSourceWrapper {
    */
   setVolume(volume) {
     this.gainNode.gain.value = volume / 100;
+  }
+
+  /**
+   * Copied the selected segment.
+   * @param data selected segment data
+   * @returns {AudioBuffer}
+   */
+  copy(data) {
+    // stop before modifying
+    this.stop();
+
+    // cut out the selected data!
+    const start = data.start;
+    const duration = data.duration;
+
+    const buffer = this.buffer;
+    const numChannels = this.buffer.numberOfChannels;
+    const sampleRate = this.audioCtx.sampleRate;
+
+    // calculate buffer info
+    const startFrame = Math.floor(start * sampleRate);
+    const durationInFrames = Math.floor(duration * sampleRate);
+    const endFrame = startFrame + durationInFrames;
+
+    const copiedBuffer = this.audioCtx.createBuffer(numChannels, durationInFrames, sampleRate);
+
+    // copy contents into the new buffer
+    for (let channel = 0; channel < numChannels; channel++) {
+      const oldBufferChannelData = buffer.getChannelData(channel);
+      const copiedBufferChannelData = copiedBuffer.getChannelData(channel);
+
+      for (let i = startFrame; i < endFrame; i++) {
+        copiedBufferChannelData[i - startFrame] = oldBufferChannelData[i];
+      }
+    }
+
+    // allocate new buffer
+    return copiedBuffer;
   }
 
   /**

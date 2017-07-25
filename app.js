@@ -96,6 +96,9 @@ app.get('/library/:username', controller.libraryInfo);
 // return the audio upon user request on library-stored audio
 app.get('/useraudio/:username/:url', controller.getAudioByUrl);
 
+// send the impulse response file to the client
+app.get('/impulse', controller.impulse);
+
 // not found message 404
 app.use(controller.notFound);
 

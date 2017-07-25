@@ -9,6 +9,10 @@ class Toolbox {
     this.createToolbox();
   }
 
+  /**
+   * Create a toolbox and append at the top of the webpage.
+   * The toolbox provides various editing functionalities to the tracks.
+   */
   createToolbox() {
     const elemString = `
       <div class="row" id="toolbox">
@@ -20,11 +24,11 @@ class Toolbox {
                 Load Sample Track
               </button>
               <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                <a class="sampletrack-item" data-value="starcraft" href="#">Starcraft Adjutant</a>
+                <a class="sampletrack-item" data-value="starcraft" href="#"> Starcraft Adjutant</a>
                 <br />
-                <a class="sampletrack-item" data-value="itsgonnarain" href="#">It's Gonna Rain</a>
+                <a class="sampletrack-item" data-value="itsgonnarain" href="#"> It's Gonna Rain</a>
                 <br />
-                <a class="sampletrack-item" data-value="exhale" href="#">Exhale</a>
+                <a class="sampletrack-item" data-value="exhale" href="#"> Exhale</a>
               </div>
             </div>
             
@@ -35,6 +39,9 @@ class Toolbox {
               </button>
               <button type="button" class="btn btn-secondary" id="cutBtn">
                 <i class="fa fa-scissors"></i> Cut
+              </button>
+              <button type="button" class="btn btn-secondary" id="copyBtn">
+                <i class="fa fa-copy"></i> Copy
               </button>
               <button type="button" class="btn btn-secondary" id="pasteBtn">
                 <i class="fa fa-clipboard"></i> Paste
@@ -53,8 +60,17 @@ class Toolbox {
               </button>
             </div>
             <div class="btn-group" role="group">
+              <button type="button" class="btn btn-secondary" id="nofilter">
+                No Filter
+              </button>
               <button type="button" class="btn btn-secondary" id="lpf">
                 Low Pass Filter
+              </button>
+              <button type="button" class="btn btn-secondary" id="hpf">
+                High Pass Filter
+              </button>
+              <button type="button" class="btn btn-secondary" id="reverb">
+                Reverb
               </button>
               <button type="button" class="btn btn-secondary" id="fadeInBtn">
                 Fade In
@@ -109,7 +125,17 @@ class Toolbox {
     // add low pass filter listener
     const lpFilter = document.getElementById('lpf');
     lpFilter.addEventListener('click', () => {
-      this.tracks.applyLpFilter();
+      this.tracks.applyBiquadFilter('lowpass', 1500, 0);
+    }, false);
+
+    const hpFilter = document.getElementById('hpf');
+    hpFilter.addEventListener('click', () => {
+      this.tracks.applyBiquadFilter('highpass', 2000, 0);
+    }, false);
+
+    const noFilter = document.getElementById('nofilter');
+    noFilter.addEventListener('click', () => {
+      this.tracks.disconnectFilter();
     }, false);
 
     // play / stop / pause all buttons
@@ -145,6 +171,11 @@ class Toolbox {
       this.tracks.paste();
     });
 
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.addEventListener('click', () => {
+      this.tracks.copySelection();
+    });
+
     const fadeInBtn = document.getElementById('fadeInBtn');
     fadeInBtn.addEventListener('click', () => {
       this.tracks.fadeIn();
@@ -153,6 +184,11 @@ class Toolbox {
     const fadeOutBtn = document.getElementById('fadeOutBtn');
     fadeOutBtn.addEventListener('click', () => {
       this.tracks.fadeOut();
+    });
+
+    const reverbBtn = document.getElementById('reverb');
+    reverbBtn.addEventListener('click', () => {
+      this.tracks.applyReverb();
     });
   }
 }

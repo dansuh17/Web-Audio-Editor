@@ -102,6 +102,18 @@ function audioReqByTrackName(req, res) {
   });
 }
 
+// send the impulse response file
+function impulse(req, res) {
+  const impulseFile = path.resolve(__dirname, '../public/impulse/impulse2.wav');
+  const readStream = fs.createReadStream(impulseFile);
+  readStream.pipe(res);
+
+  readStream.on('end', () => {
+    res.end();
+    console.log('Sending impulse file.');
+  });
+}
+
 // upload a user-uploaded file
 function upload(req, res) {
   // needs a session being maintained (logged in)
@@ -213,4 +225,5 @@ module.exports = {
   upload,
   libraryInfo,
   getAudioByUrl,
+  impulse,
 };

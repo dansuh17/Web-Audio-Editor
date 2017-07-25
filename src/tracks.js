@@ -21,6 +21,8 @@ class Tracks {
     this.changePlayRate = this.changePlayRate.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
+    this.applyBiquadFilter = this.applyBiquadFilter.bind(this);
+    this.applyReverb = this.applyReverb.bind(this);
     Tracks.setModeForTimeline = Tracks.setModeForTimeline.bind(this);
 
     this.trackIndex = 0;
@@ -85,9 +87,9 @@ class Tracks {
     return segmentLayer.getDatumFromItem(segment);
   }
 
-  applyLpFilter() {
+  applyBiquadFilter(type, freq, gain) {
     const id = this.currentTrackId;
-    this.tracks[id].audioSource.applyLpFilter();
+    this.tracks[id].audioSource.applyBiquadFilter(type, freq, gain);
   }
 
   fadeIn() {
@@ -102,6 +104,11 @@ class Tracks {
     const newAudioBuffer = this.tracks[id].audioSource.fadeOut();
     this.eraseWave(id);
     this.renderWave(newAudioBuffer, this.audioCtx, id);
+  }
+
+  disconnectFilter() {
+    const id = this.currentTrackId;
+    this.tracks[id].audioSource.disconnectFilter();
   }
 
   /**
@@ -339,6 +346,23 @@ class Tracks {
   }
 
   /**
+   * Copies the selection and save to variable.
+   */
+  copySelection() {
+    const id = this.currentTrackId;
+    const segmentData = this.getSegmentData(id);
+    this.cutBuffer = this.tracks[id].audioSource.copy(segmentData);
+  }
+
+  /**
+   * Apply reverb to the track.
+   */
+  applyReverb() {
+    const id = this.currentTrackId;
+    this.tracks[id].audioSource.applyReverb();
+  }
+
+  /**
    * Paste the cutout buffer to the current selection.
    */
   paste() {
@@ -427,7 +451,6 @@ class Tracks {
    */
   stop(e) {
     const id = e.target.dataset.trackid;
-    console.log(this.tracks);
     this.tracks[id].audioSource.stop();
   }
 
@@ -437,7 +460,6 @@ class Tracks {
    */
   pause(e) {
     const id = e.target.dataset.trackid;
-    console.log(this.tracks);
     this.tracks[id].audioSource.pause();
   }
 
@@ -447,7 +469,6 @@ class Tracks {
    */
   play(e) {
     const id = e.target.dataset.trackid;
-    console.log(this.tracks);
     this.tracks[id].audioSource.play();
   }
 
@@ -518,15 +539,13 @@ class Tracks {
     cursorLayer.setTimeContext(new wavesUI.core.LayerTimeContext(timeline.timeContext));
 
     // create an audio source wrapper and collect
-    const audioSourceWrapper = new AudioSourceWrapper({
+    this.tracks[trackId].audioSource = new AudioSourceWrapper({
       audioCtx,
       trackIndex: trackId,
       buffer: audioBuffer,
       source: null,
       cursorLayer,
     });
-
-    this.tracks[trackId].audioSource = audioSourceWrapper;
 
     // add layers to tracks
     track.add(cursorLayer);
@@ -576,6 +595,5 @@ class Tracks {
     });
   }
 }
-
 
 export default Tracks;
